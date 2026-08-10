@@ -1,7 +1,8 @@
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../core/theme/app_theme.dart';
 import '../admin/admin_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,195 +12,205 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
   final AuthRepository _authRepository = AuthRepository();
   String _pin = '';
   bool _isLoading = false;
 
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _slideController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.06), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
+    _fadeController.forward();
+    _slideController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
+  }
+
   void _onKeyPress(String value) {
     if (_isLoading) return;
-
     setState(() {
       if (value == 'C') {
         _pin = '';
       } else if (value == 'DEL') {
-        if (_pin.isNotEmpty) {
-          _pin = _pin.substring(0, _pin.length - 1);
-        }
+        if (_pin.isNotEmpty) _pin = _pin.substring(0, _pin.length - 1);
       } else {
-        if (_pin.length < 4) {
-          _pin += value;
-        }
+        if (_pin.length < 4) _pin += value;
       }
     });
-
-    if (_pin.length == 4) {
-      _login();
-    }
+    if (_pin.length == 4) _login();
   }
 
   Future<void> _login() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+    setState(() => _isLoading = true);
     try {
       final usuario = await _authRepository.login(_pin);
       if (mounted) {
         if (usuario.rol == 'admin') {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const AdminScreen()),
-          );
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const AdminScreen()));
         } else {
           Navigator.of(context).pushReplacementNamed('/mesas');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Bienvenido, ${usuario.nombre}'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Bienvenido, ${usuario.nombre}')));
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _pin = '';
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        setState(() { _pin = ''; _isLoading = false; });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.toString().replaceAll('Exception: ', '')),
+          backgroundColor: AppColors.error,
+        ));
       }
     }
   }
 
   Widget _buildNumpadButton(String label, {IconData? icon}) {
-    return InkWell(
+    final isClear = label == 'C';
+    return GestureDetector(
       onTap: () => _onKeyPress(label),
-      borderRadius: BorderRadius.circular(40),
-      child: Container(
-        width: 80,
-        height: 80,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        width: 76, height: 76,
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
           shape: BoxShape.circle,
+          color: isClear ? AppColors.error.withOpacity(0.15) : AppColors.overlayLight,
+          border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4))],
         ),
-        child: Center(
-          child: icon != null
-              ? Icon(icon, size: 32, color: Colors.black87)
-              : Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
+        child: ClipOval(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: Center(
+              child: icon != null
+                  ? Icon(icon, size: 26, color: Colors.white.withOpacity(0.9))
+                  : Text(label, style: AppTextStyles.numpad.copyWith(
+                      color: isClear ? AppColors.error.withOpacity(0.9) : Colors.white)),
+            ),
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildPinDot(bool isFilled) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutBack,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      width: isFilled ? 18 : 16, height: isFilled ? 18 : 16,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isFilled ? AppColors.accent : Colors.transparent,
+        border: Border.all(color: isFilled ? AppColors.accent : Colors.white.withOpacity(0.5), width: 2),
+        boxShadow: isFilled ? [BoxShadow(color: AppColors.accent.withOpacity(0.5), blurRadius: 8, spreadRadius: 2)] : [],
+      ),
+    );
+  }
+
+  Widget _buildRow(List<String> keys) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: keys.map(_buildNumpadButton).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-            Text(
-              'OrderSoft',
-              style: GoogleFonts.outfit(
-                fontSize: 48,
-                fontWeight: FontWeight.w800,
-                color: Colors.blueAccent.shade700,
+      body: Stack(
+        children: [
+          Container(
+            width: size.width, height: size.height,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft, end: Alignment.bottomRight,
+                colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
+                stops: [0.0, 0.5, 1.0],
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Introduce tu código de acceso',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                color: Colors.grey.shade600,
+          ),
+          Positioned(top: -80, right: -60,
+            child: Container(width: 280, height: 280,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.accent.withOpacity(0.08)))),
+          Positioned(bottom: -100, left: -80,
+            child: Container(width: 320, height: 320,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primaryLight.withOpacity(0.3)))),
+          SafeArea(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(flex: 2),
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [Colors.white, AppColors.accent],
+                        begin: Alignment.topLeft, end: Alignment.bottomRight,
+                      ).createShader(bounds),
+                      child: Text('OrderSoft', style: AppTextStyles.displayLarge),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Sistema de Punto de Venta',
+                      style: AppTextStyles.bodyMedium.copyWith(color: Colors.white.withOpacity(0.55), letterSpacing: 1.2)),
+                    const Spacer(flex: 2),
+                    Text('Ingresa tu codigo de acceso',
+                      style: AppTextStyles.labelMedium.copyWith(color: Colors.white.withOpacity(0.7), letterSpacing: 0.5)),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(4, (i) => _buildPinDot(i < _pin.length)),
+                    ),
+                    const SizedBox(height: 28),
+                    if (_isLoading)
+                      const SpinKitThreeBounce(color: AppColors.accent, size: 28)
+                    else
+                      const SizedBox(height: 28),
+                    const Spacer(flex: 1),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Column(
+                        children: [
+                          _buildRow(['1', '2', '3']),
+                          const SizedBox(height: 18),
+                          _buildRow(['4', '5', '6']),
+                          const SizedBox(height: 18),
+                          _buildRow(['7', '8', '9']),
+                          const SizedBox(height: 18),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildNumpadButton('C'),
+                              _buildNumpadButton('0'),
+                              _buildNumpadButton('DEL', icon: Icons.backspace_outlined),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(flex: 2),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 48),
-            // Indicador de PIN
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (index) {
-                final isFilled = index < _pin.length;
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isFilled ? Colors.blueAccent.shade700 : Colors.grey.shade300,
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 48),
-            if (_isLoading)
-              SpinKitThreeBounce(
-                color: Colors.blueAccent.shade700,
-                size: 30.0,
-              )
-            else
-              const SizedBox(height: 30),
-            const Spacer(),
-            // Numpad 3x4
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildNumpadButton('1'),
-                      _buildNumpadButton('2'),
-                      _buildNumpadButton('3'),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildNumpadButton('4'),
-                      _buildNumpadButton('5'),
-                      _buildNumpadButton('6'),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildNumpadButton('7'),
-                      _buildNumpadButton('8'),
-                      _buildNumpadButton('9'),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildNumpadButton('C'),
-                      _buildNumpadButton('0'),
-                      _buildNumpadButton('DEL', icon: Icons.backspace_outlined),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 48),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

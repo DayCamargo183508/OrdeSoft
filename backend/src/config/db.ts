@@ -5,11 +5,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  },
   // Opciones de optimización para un servidor local rápido
   max: 20, // Máximo de clientes en el pool
   idleTimeoutMillis: 30000, // Cerrar conexiones inactivas tras 30s

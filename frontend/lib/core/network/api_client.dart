@@ -13,9 +13,9 @@ class ApiClient {
 
   String get baseUrl {
     if (kIsWeb || Platform.isWindows || Platform.isMacOS) {
-      return 'http://localhost:3000/api';
+      return 'http://127.0.0.1:3500/api';
     }
-    return 'http://10.0.2.2:3000/api';
+    return 'http://10.0.2.2:3500/api';
   }
 
   ApiClient._internal() {

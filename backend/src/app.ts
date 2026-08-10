@@ -14,8 +14,8 @@ import adminRoutes from './packages/admin/admin.routes';
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3500;
-const HOST = '127.0.0.1';
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = '0.0.0.0';
 
 // Configurar Middlewares Globales
 app.use(cors());
@@ -66,15 +66,15 @@ const server = app.listen(PORT, HOST, () => {
     }
   }
 
-  console.log(`\n🚀 SERVIDOR ONLINE Y LISTO EN LA RED:`);
-  console.log(`🔗 Conexión Windows / Localhost: http://127.0.0.1:${PORT}`);
-  console.log(`📱 Conexión Android / Módem LAN: http://${localIp}:${PORT}/api\n`);
+  console.log(`\n[SERVER] Servidor en linea:`);
+  console.log(`  > Localhost:  http://127.0.0.1:${PORT}`);
+  console.log(`  > Red local:  http://${localIp}:${PORT}/api\n`);
 });
 
 server.on('error', (err: any) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`❌ ERROR CRÍTICO: El puerto ${PORT} ya está siendo usado por otro proceso en Windows.`);
+    console.error(`[ERROR] Puerto ${PORT} ya esta en uso por otro proceso.`);
   } else {
-    console.error(`❌ ERROR AL INICIAR SERVIDOR:`, err);
+    console.error(`[ERROR] Fallo al iniciar el servidor:`, err);
   }
 });

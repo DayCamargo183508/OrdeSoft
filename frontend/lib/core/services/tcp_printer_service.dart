@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:convert';
+
 import '../../data/models/printer_config.dart';
 
 class TcpPrinterService {

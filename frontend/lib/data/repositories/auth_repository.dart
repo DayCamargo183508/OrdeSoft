@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import '../../core/network/api_client.dart';
 import '../models/usuario_model.dart';
 
@@ -9,7 +10,7 @@ class AuthRepository {
   Future<Usuario> login(String pin) async {
     try {
       final payload = {'pin': pin.toString()};
-      print('>>> [FLUTTER] ENVIANDO LOGIN A: ${_apiClient.dio.options.baseUrl}/auth/login');
+      debugPrint('Intentando conectar a: ${_apiClient.dio.options.baseUrl}/auth/login');
       print('>>> [FLUTTER] PAYLOAD: $payload');
 
       final response = await _apiClient.dio.post(
@@ -34,11 +35,22 @@ class AuthRepository {
         throw Exception('Error al iniciar sesión');
       }
     } on DioException catch (e) {
+      debugPrint("❌ DIO ERROR TYPE: ${e.type}");
+      debugPrint("❌ DIO ERROR STATUS: ${e.response?.statusCode}");
+      debugPrint("❌ DIO ERROR DATA: ${e.response?.data}");
+      debugPrint("❌ DIO ERROR MESSAGE: ${e.message}");
+
       if (e.response != null && e.response?.statusCode == 401) {
          throw Exception('PIN incorrecto');
       }
+      
+      if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout || e.message?.contains('ECONNREFUSED') == true) {
+         throw Exception('No se pudo conectar con el servidor. Verifica que el Backend esté iniciado en el puerto 3500.');
+      }
+      
       throw Exception('Error de conexión: ${e.message}');
     } catch (e) {
+      debugPrint("❌ ERROR GENERAL: $e");
       throw Exception('Error inesperado: $e');
     }
   }

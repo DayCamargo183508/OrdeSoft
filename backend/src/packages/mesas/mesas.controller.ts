@@ -21,7 +21,7 @@ export const createMesa = async (req: Request, res: Response) => {
     const nuevaMesa = await MesasRepository.createMesa(capacidad || 4);
     res.status(201).json(nuevaMesa);
   } catch (error: any) {
-    console.error("🔴 Error detallado en createMesa:", error);
+    console.error('[ERROR] createMesa:', error);
     res.status(500).json({ message: error.message || "Error interno al crear mesa" });
   }
 };
@@ -63,7 +63,7 @@ export const deleteMesa = async (req: Request, res: Response) => {
     }
     res.json({ message: 'Mesa eliminada con éxito', mesa: mesaEliminada });
   } catch (error: any) {
-    console.error("🔴 Error detallado en deleteMesa:", error);
+    console.error('[ERROR] deleteMesa:', error);
     // Return 400 if it's the known validation error from the repo, otherwise 500
     if (error.message.includes("mínimo permitido") || error.message.includes("pedido activo")) {
       res.status(400).json({ message: error.message });

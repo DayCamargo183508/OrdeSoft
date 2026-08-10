@@ -12,6 +12,7 @@ import '../../data/models/printer_config.dart';
 import '../../core/services/kitchen_ticket_service.dart';
 import '../../data/models/comanda_model.dart';
 import '../widgets/ticket_preview_dialog.dart';
+import '../../core/theme/app_theme.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -47,9 +48,6 @@ class _AdminScreenState extends State<AdminScreen> {
     _cargarTodo();
   }
 
-  Future<void> _cargarDatos() async {
-    await _cargarTodo();
-  }
 
   Future<void> _cargarTodo() async {
     setState(() => _isLoading = true);
@@ -94,73 +92,44 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
+  // ── Navegación compartida ─────────────────────────────────────────
+  static const _destinations = [
+    (icon: Icons.bar_chart_outlined, selectedIcon: Icons.bar_chart, label: 'Reporte'),
+    (icon: Icons.group_outlined, selectedIcon: Icons.group, label: 'Meseros'),
+    (icon: Icons.table_bar_outlined, selectedIcon: Icons.table_bar, label: 'Mesas'),
+    (icon: Icons.note_alt_outlined, selectedIcon: Icons.note_alt, label: 'Notas'),
+    (icon: Icons.fastfood_outlined, selectedIcon: Icons.fastfood, label: 'Menu'),
+    (icon: Icons.print_outlined, selectedIcon: Icons.print, label: 'Impresora'),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width >= AppBreakpoints.mobile;
+
+    if (isDesktop) {
+      return _buildDesktopLayout();
+    }
+    return _buildMobileLayout();
+  }
+
+  Widget _buildDesktopLayout() {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Panel de Administración', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.blueGrey.shade900,
-        foregroundColor: Colors.white,
+        title: const Text('Panel de Administracion'),
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _cargarTodo, tooltip: 'Recargar'),
+          IconButton(icon: const Icon(Icons.logout, color: AppColors.error), onPressed: _cerrarSesion, tooltip: 'Cerrar Sesion'),
+        ],
       ),
       body: Row(
         children: [
           NavigationRail(
             selectedIndex: _selectedIndex,
-            onDestinationSelected: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+            onDestinationSelected: (index) => setState(() => _selectedIndex = index),
             labelType: NavigationRailLabelType.all,
-            backgroundColor: Colors.blueGrey.shade50,
-            selectedIconTheme: const IconThemeData(color: Colors.blueAccent),
-            selectedLabelTextStyle: GoogleFonts.inter(color: Colors.blueAccent, fontWeight: FontWeight.bold),
-            unselectedLabelTextStyle: GoogleFonts.inter(color: Colors.grey.shade700),
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.bar_chart_outlined),
-                selectedIcon: Icon(Icons.bar_chart),
-                label: Text('Reporte'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.group_outlined),
-                selectedIcon: Icon(Icons.group),
-                label: Text('Meseros'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.table_bar_outlined),
-                selectedIcon: Icon(Icons.table_bar),
-                label: Text('Mesas'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.note_alt_outlined),
-                selectedIcon: Icon(Icons.note_alt),
-                label: Text('Notas'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.fastfood_outlined),
-                selectedIcon: Icon(Icons.fastfood),
-                label: Text('Menú'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.print_outlined),
-                selectedIcon: Icon(Icons.print),
-                label: Text('Impresora'),
-              ),
-            ],
-            trailing: Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.redAccent),
-                    tooltip: 'Cerrar Sesión',
-                    onPressed: _cerrarSesion,
-                  ),
-                ),
-              ),
-            ),
+            destinations: _destinations.map((d) => NavigationRailDestination(
+              icon: Icon(d.icon), selectedIcon: Icon(d.selectedIcon), label: Text(d.label),
+            )).toList(),
           ),
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(
@@ -172,6 +141,63 @@ class _AdminScreenState extends State<AdminScreen> {
       ),
     );
   }
+
+  Widget _buildMobileLayout() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Panel de Administracion'),
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _cargarTodo),
+        ],
+      ),
+      drawer: Drawer(
+        backgroundColor: AppColors.surfacePanel,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(padding: const EdgeInsets.all(16),
+                child: Text('OrderSoft Admin', style: AppTextStyles.headingMedium)),
+              const Divider(),
+              Expanded(
+                child: ListView(
+                  children: _destinations.asMap().entries.map((e) {
+                    final isSelected = _selectedIndex == e.key;
+                    return ListTile(
+                      leading: Icon(isSelected ? e.value.selectedIcon : e.value.icon,
+                        color: isSelected ? AppColors.accent : AppColors.textSecondary),
+                      title: Text(e.value.label, style: AppTextStyles.labelMedium.copyWith(
+                          color: isSelected ? AppColors.accent : AppColors.textPrimary,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal)),
+                      selected: isSelected,
+                      selectedTileColor: AppColors.accent.withOpacity(0.08),
+                      shape: const RoundedRectangleBorder(borderRadius: AppRadius.buttonRadius),
+                      onTap: () { setState(() => _selectedIndex = e.key); Navigator.pop(context); },
+                    );
+                  }).toList(),
+                ),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout, color: AppColors.error),
+                title: Text('Cerrar Sesion', style: AppTextStyles.labelMedium.copyWith(color: AppColors.error)),
+                onTap: _cerrarSesion,
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildContent(),
+    );
+  }
+
 
   Widget _buildContent() {
     switch (_selectedIndex) {
@@ -609,7 +635,7 @@ class _AdminScreenState extends State<AdminScreen> {
                           try {
                             await _adminRepo.actualizarConfiguracion(minM, maxM);
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Configuración guardada')));
-                            _cargarDatos();
+                            _cargarTodo();
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                           }
@@ -654,7 +680,7 @@ class _AdminScreenState extends State<AdminScreen> {
                       await _adminRepo.crearNotaRapida(txtCtrl.text.trim(), precioExtra: precio);
                       txtCtrl.clear();
                       precioCtrl.clear();
-                      _cargarDatos();
+                      _cargarTodo();
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                     }
@@ -683,7 +709,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   onDeleted: () async {
                     try {
                       await _adminRepo.eliminarNotaRapida(n.id);
-                      _cargarDatos();
+                      _cargarTodo();
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                     }
@@ -728,7 +754,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   final precio = double.tryParse(precioCtrl.text.trim()) ?? 0.0;
                   await _adminRepo.actualizarNotaRapida(n.id, txtCtrl.text.trim(), precioExtra: precio);
                   Navigator.pop(ctx);
-                  _cargarDatos();
+                  _cargarTodo();
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
@@ -898,7 +924,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 try {
                   await _menuRepo.crearCategoria(nombreCtrl.text.trim());
                   Navigator.pop(ctx);
-                  _cargarDatos();
+                  _cargarTodo();
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
@@ -925,7 +951,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 try {
                   await _menuRepo.actualizarCategoria(c.id, nombreCtrl.text.trim());
                   Navigator.pop(ctx);
-                  _cargarDatos();
+                  _cargarTodo();
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
@@ -1007,7 +1033,7 @@ class _AdminScreenState extends State<AdminScreen> {
                         if (p == null) {
                           await _menuRepo.crearProducto(data);
                           Navigator.pop(ctx);
-                          _cargarDatos();
+                          _cargarTodo();
                         } else {
                           final double precioParsed = double.tryParse(precioCtrl.text.trim()) ?? 0.0;
                           try {
