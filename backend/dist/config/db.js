@@ -80,10 +80,17 @@ const initDatabase = async () => {
         CREATE TABLE IF NOT EXISTS categorias (
           id SERIAL PRIMARY KEY,
           nombre VARCHAR(100) UNIQUE NOT NULL,
+          activa BOOLEAN DEFAULT TRUE,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
             console.log('Tabla categorias verificada/creada exitosamente.');
+            // Insertar categoría General por defecto si está vacía
+            await pool.query(`
+        INSERT INTO categorias (nombre)
+        SELECT 'General'
+        WHERE NOT EXISTS (SELECT 1 FROM categorias)
+      `);
             await pool.query(`
         CREATE TABLE IF NOT EXISTS comandas (
           id SERIAL PRIMARY KEY,
@@ -120,6 +127,7 @@ const initDatabase = async () => {
                 await pool.query("ALTER TABLE comandas ADD COLUMN IF NOT EXISTS nombre_cliente VARCHAR(100) DEFAULT NULL");
                 await pool.query("ALTER TABLE comandas ADD COLUMN IF NOT EXISTS metodo_pago VARCHAR(20) DEFAULT 'EFECTIVO'");
                 await pool.query("ALTER TABLE mesas ADD COLUMN IF NOT EXISTS mesa_padre_id INT REFERENCES mesas(id) ON DELETE SET NULL");
+                await pool.query("ALTER TABLE categorias ADD COLUMN IF NOT EXISTS activa BOOLEAN DEFAULT TRUE");
                 console.log('Migraciones aplicadas exitosamente.');
             }
             catch (migErr) {

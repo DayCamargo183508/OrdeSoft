@@ -8,7 +8,7 @@ const db_1 = __importDefault(require("../../config/db"));
 const firebase_1 = require("../../config/firebase");
 // --- CATEGORIAS ---
 const getCategorias = async () => {
-    const result = await db_1.default.query('SELECT * FROM categorias WHERE activa = true ORDER BY nombre ASC');
+    const result = await db_1.default.query('SELECT id, nombre FROM categorias WHERE activa = true ORDER BY nombre ASC');
     return result.rows;
 };
 exports.getCategorias = getCategorias;

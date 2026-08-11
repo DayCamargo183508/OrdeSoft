@@ -4,7 +4,7 @@ import { Query } from 'firebase-admin/firestore';
 
 // --- CATEGORIAS ---
 export const getCategorias = async () => {
-  const result = await pool.query('SELECT * FROM categorias WHERE activa = true ORDER BY nombre ASC');
+  const result = await pool.query('SELECT id, nombre FROM categorias WHERE activa = true ORDER BY nombre ASC');
   return result.rows;
 };
 

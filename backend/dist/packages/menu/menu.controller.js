@@ -39,12 +39,13 @@ const MenuRepository = __importStar(require("./menu.repository"));
 const getCategorias = async (req, res) => {
     try {
         const categorias = await MenuRepository.getCategorias();
-        res.json(categorias);
+        res.json(categorias || []);
     }
     catch (error) {
         console.error('[DATABASE ERROR]:', error);
-        console.error('Error obteniendo categorias:', error);
-        res.status(500).json({ message: error.message || 'Error al obtener categorias' });
+        console.error('[CATEGORIAS ERROR]: Error obteniendo categorias:', error);
+        // Retornamos 200 con un arreglo vacío para evitar romper el flujo en la app Flutter
+        res.status(200).json([]);
     }
 };
 exports.getCategorias = getCategorias;
