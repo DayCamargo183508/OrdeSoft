@@ -71,6 +71,7 @@ const initDatabase = async () => {
           numero VARCHAR(50) UNIQUE NOT NULL,
           capacidad INT DEFAULT 4,
           estado VARCHAR(20) DEFAULT 'libre',
+          mesa_padre_id INT REFERENCES mesas(id) ON DELETE SET NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
@@ -118,6 +119,7 @@ const initDatabase = async () => {
                 await pool.query("ALTER TABLE comandas ADD COLUMN IF NOT EXISTS tipo_orden VARCHAR(20) DEFAULT 'MESA'");
                 await pool.query("ALTER TABLE comandas ADD COLUMN IF NOT EXISTS nombre_cliente VARCHAR(100) DEFAULT NULL");
                 await pool.query("ALTER TABLE comandas ADD COLUMN IF NOT EXISTS metodo_pago VARCHAR(20) DEFAULT 'EFECTIVO'");
+                await pool.query("ALTER TABLE mesas ADD COLUMN IF NOT EXISTS mesa_padre_id INT REFERENCES mesas(id) ON DELETE SET NULL");
                 console.log('Migraciones aplicadas exitosamente.');
             }
             catch (migErr) {
