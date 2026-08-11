@@ -9,7 +9,7 @@ export const obtenerActivas = async (req: Request, res: Response) => {
     res.json(comandas);
   } catch (error) {
     console.error('Error obteniendo comandas activas:', error);
-    res.status(500).json({ error: 'Error al obtener comandas activas' });
+    res.status(500).json({ message: (error as Error).message || 'Error al obtener comandas activas' });
   }
 };
 
@@ -19,7 +19,7 @@ export const obtenerParaLlevar = async (req: Request, res: Response) => {
     res.json(comandas);
   } catch (error) {
     console.error('Error obteniendo comandas para llevar:', error);
-    res.status(500).json({ error: 'Error al obtener comandas para llevar' });
+    res.status(500).json({ message: (error as Error).message || 'Error al obtener comandas para llevar' });
   }
 };
 
@@ -34,7 +34,7 @@ export const obtenerPorId = async (req: Request, res: Response) => {
     res.json(comanda);
   } catch (error) {
     console.error('Error obteniendo detalle de comanda:', error);
-    res.status(500).json({ error: 'Error al obtener detalle de la comanda' });
+    res.status(500).json({ message: (error as Error).message || 'Error al obtener detalle de la comanda' });
   }
 };
 
@@ -89,6 +89,11 @@ export const crearComanda = async (req: Request, res: Response) => {
         return;
       }
       // Obtener el precio base y nombre si el frontend no envió un precio unitario final
+      if (!firestore) {
+        res.status(500).json({ message: 'Firestore no está inicializado. Verifica firebase-key.json' });
+        return;
+      }
+      
       const prodRef = await firestore.collection('productos').doc(d.producto_id).get();
       if (!prodRef.exists || !prodRef.data()?.disponible) {
         res.status(400).json({ error: `El producto con ID ${d.producto_id} no existe o no está disponible.` });
@@ -131,7 +136,7 @@ export const crearComanda = async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error('Error creando comanda:', error);
-    res.status(500).json({ error: 'Error interno al crear comanda.' });
+    res.status(500).json({ message: (error as Error).message || 'Error interno al crear comanda.' });
   }
 };
 
@@ -143,10 +148,10 @@ export const pagarComanda = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error al pagar comanda:', error);
     if (error.message === 'Comanda no encontrada') {
-      res.status(404).json({ error: error.message });
+      res.status(404).json({ message: error.message });
       return;
     }
-    res.status(500).json({ error: 'Error al procesar el pago de la comanda.' });
+    res.status(500).json({ message: error.message || 'Error al procesar el pago de la comanda.' });
   }
 };
 
@@ -164,7 +169,7 @@ export const pagarCuenta = async (req: Request, res: Response) => {
     res.json({ message: 'Cuenta pagada exitosamente', ...resultado });
   } catch (error: any) {
     console.error('Error al pagar cuenta:', error);
-    res.status(500).json({ error: 'Error al procesar el pago de la cuenta.' });
+    res.status(500).json({ message: error.message || 'Error al procesar el pago de la cuenta.' });
   }
 };
 
@@ -221,6 +226,6 @@ export const obtenerTicketCocina = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error generando ticket:', error);
-    res.status(500).json({ error: 'Error al generar el ticket de cocina.' });
+    res.status(500).json({ message: (error as Error).message || 'Error al generar el ticket de cocina.' });
   }
 };

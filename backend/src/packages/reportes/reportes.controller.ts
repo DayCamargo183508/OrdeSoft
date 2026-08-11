@@ -21,6 +21,6 @@ export const getVentasHoy = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error generando reporte de ventas:', error);
-    res.status(500).json({ error: 'Error al generar reporte de ventas' });
+    res.status(500).json({ message: (error as Error).message || 'Error al generar reporte de ventas' });
   }
 };

@@ -15,7 +15,7 @@ const obtenerMeseros = async (req, res) => {
     }
     catch (error) {
         console.error('Error al obtener meseros:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.obtenerMeseros = obtenerMeseros;
@@ -39,7 +39,7 @@ const crearMesero = async (req, res) => {
     }
     catch (error) {
         console.error('Error al crear mesero:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.crearMesero = crearMesero;
@@ -67,7 +67,7 @@ const actualizarMesero = async (req, res) => {
     }
     catch (error) {
         console.error('Error al actualizar mesero:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.actualizarMesero = actualizarMesero;
@@ -88,7 +88,7 @@ const updateEstadoMesero = async (req, res) => {
     }
     catch (error) {
         console.error('Error al actualizar estado del mesero:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.updateEstadoMesero = updateEstadoMesero;
@@ -109,7 +109,7 @@ const eliminarMesero = async (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.eliminarMesero = eliminarMesero;
@@ -131,7 +131,7 @@ const loginPin = async (req, res) => {
     }
     catch (error) {
         console.error('Error en login con PIN:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.loginPin = loginPin;
@@ -142,7 +142,7 @@ const obtenerConfig = async (req, res) => {
     }
     catch (error) {
         console.error('Error al obtener configuración:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.obtenerConfig = obtenerConfig;
@@ -158,7 +158,7 @@ const actualizarConfig = async (req, res) => {
     }
     catch (error) {
         console.error('Error al actualizar configuración:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.actualizarConfig = actualizarConfig;
@@ -169,7 +169,7 @@ const obtenerNotasRapidas = async (req, res) => {
     }
     catch (error) {
         console.error('Error al obtener notas rápidas:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.obtenerNotasRapidas = obtenerNotasRapidas;
@@ -186,7 +186,7 @@ const crearNotaRapida = async (req, res) => {
     }
     catch (error) {
         console.error('Error al crear nota rápida:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.crearNotaRapida = crearNotaRapida;
@@ -204,7 +204,7 @@ const actualizarNotaRapida = async (req, res) => {
     }
     catch (error) {
         console.error('Error al actualizar nota rápida:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.actualizarNotaRapida = actualizarNotaRapida;
@@ -216,7 +216,7 @@ const eliminarNotaRapida = async (req, res) => {
     }
     catch (error) {
         console.error('Error al eliminar nota rápida:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.eliminarNotaRapida = eliminarNotaRapida;
@@ -227,7 +227,7 @@ const obtenerReporteDiario = async (req, res) => {
     }
     catch (error) {
         console.error('Error al generar reporte diario:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        res.status(500).json({ message: error.message || 'Error interno del servidor' });
     }
 };
 exports.obtenerReporteDiario = obtenerReporteDiario;

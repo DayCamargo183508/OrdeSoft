@@ -52,6 +52,17 @@ app.get('/api/health', async (req: Request, res: Response) => {
   }
 });
 
+// Middleware Global de Manejo de Errores (debe ir después de todas las rutas)
+app.use((err: any, req: Request, res: Response, next: express.NextFunction) => {
+  console.error('[Global Error Middleware]', err.stack || err);
+  res.status(500).json({
+    status: 'error',
+    message: err.message || 'Error interno del servidor',
+    // Ocultar stacktrace en producción si existiera entorno
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+  });
+});
+
 // Listener del servidor
 const server = app.listen(PORT, HOST, () => {
   const networkInterfaces = os.networkInterfaces();

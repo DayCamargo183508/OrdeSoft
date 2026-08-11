@@ -7,7 +7,7 @@ export const getMesas = async (req: Request, res: Response) => {
     res.json(mesas);
   } catch (error) {
     console.error('Error obteniendo mesas:', error);
-    res.status(500).json({ error: 'Error al obtener las mesas' });
+    res.status(500).json({ message: (error as Error).message || 'Error al obtener las mesas' });
   }
 };
 
@@ -22,7 +22,7 @@ export const createMesa = async (req: Request, res: Response) => {
     res.status(201).json(nuevaMesa);
   } catch (error: any) {
     console.error('[ERROR] createMesa:', error);
-    res.status(500).json({ message: error.message || "Error interno al crear mesa" });
+    res.status(500).json({ message: error.message || 'Error interno al crear mesa' });
   }
 };
 
@@ -33,7 +33,7 @@ export const updateEstado = async (req: Request, res: Response) => {
     const estadosValidos = ['libre', 'ocupada', 'atendida', 'reservada'];
     
     if (!estadosValidos.includes(estado)) {
-      res.status(400).json({ error: 'Estado inválido.' });
+      res.status(400).json({ message: 'Estado inválido.' });
       return;
     }
     
@@ -45,20 +45,20 @@ export const updateEstado = async (req: Request, res: Response) => {
     res.json(mesaActualizada);
   } catch (error) {
     console.error('Error actualizando estado de mesa:', error);
-    res.status(500).json({ error: 'Error al actualizar estado de la mesa' });
+    res.status(500).json({ message: (error as Error).message || 'Error al actualizar estado de la mesa' });
   }
 };
 
 export const deleteMesa = async (req: Request, res: Response) => {
   try {
     if (req.user?.rol !== 'admin' && req.user?.rol !== 'mesero') {
-      res.status(403).json({ error: 'No tienes permisos para eliminar mesas. Se requiere rol admin o mesero.' });
+      res.status(403).json({ message: 'No tienes permisos para eliminar mesas. Se requiere rol admin o mesero.' });
       return;
     }
 
     const mesaEliminada = await MesasRepository.deleteUltimaMesa();
     if (!mesaEliminada) {
-      res.status(404).json({ error: 'No hay mesas para eliminar.' });
+      res.status(404).json({ message: 'No hay mesas para eliminar.' });
       return;
     }
     res.json({ message: 'Mesa eliminada con éxito', mesa: mesaEliminada });
@@ -68,7 +68,7 @@ export const deleteMesa = async (req: Request, res: Response) => {
     if (error.message.includes("mínimo permitido") || error.message.includes("pedido activo")) {
       res.status(400).json({ message: error.message });
     } else {
-      res.status(500).json({ message: error.message || "Error interno al eliminar mesa" });
+      res.status(500).json({ message: error.message || 'Error interno al eliminar mesa' });
     }
   }
 };
@@ -77,18 +77,18 @@ export const juntarMesas = async (req: Request, res: Response) => {
   try {
     const { mesa_hija_id, mesa_padre_id } = req.body;
     if (!mesa_hija_id || !mesa_padre_id) {
-      res.status(400).json({ error: 'Faltan datos: mesa_hija_id o mesa_padre_id.' });
+      res.status(400).json({ message: 'Faltan datos: mesa_hija_id o mesa_padre_id.' });
       return;
     }
     const mesaActualizada = await MesasRepository.juntarMesas(Number(mesa_hija_id), Number(mesa_padre_id));
     if (!mesaActualizada) {
-      res.status(404).json({ error: 'Mesa hija no encontrada.' });
+      res.status(404).json({ message: 'Mesa hija no encontrada.' });
       return;
     }
     res.status(200).json({ message: 'Mesas juntadas con éxito', mesa: mesaActualizada });
   } catch (error) {
     console.error('Error juntando mesas:', error);
-    res.status(500).json({ error: 'Error al juntar las mesas' });
+    res.status(500).json({ message: (error as Error).message || 'Error al juntar las mesas' });
   }
 };
 
@@ -96,7 +96,7 @@ export const separarMesa = async (req: Request, res: Response) => {
   try {
     const { mesa_id } = req.body;
     if (!mesa_id) {
-      res.status(400).json({ error: 'El mesa_id es requerido.' });
+      res.status(400).json({ message: 'El mesa_id es requerido.' });
       return;
     }
     const mesaActualizada = await MesasRepository.separarMesa(Number(mesa_id));
@@ -107,6 +107,6 @@ export const separarMesa = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Mesa separada con éxito', mesa: mesaActualizada });
   } catch (error) {
     console.error('Error separando mesa:', error);
-    res.status(500).json({ error: 'Error al separar la mesa' });
+    res.status(500).json({ message: (error as Error).message || 'Error al separar la mesa' });
   }
 };

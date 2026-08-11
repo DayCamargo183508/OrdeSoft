@@ -8,7 +8,7 @@ export const getCategorias = async (req: Request, res: Response) => {
     res.json(categorias);
   } catch (error) {
     console.error('Error obteniendo categorias:', error);
-    res.status(500).json({ error: 'Error al obtener categorias' });
+    res.status(500).json({ message: (error as Error).message || 'Error al obtener categorias' });
   }
 };
 
@@ -31,7 +31,7 @@ export const createCategoria = async (req: Request, res: Response) => {
       res.status(400).json({ error: 'La categoría ya existe.' });
       return;
     }
-    res.status(500).json({ error: 'Error al crear categoria' });
+    res.status(500).json({ message: (error as Error).message || 'Error al crear categoria' });
   }
 };
 
@@ -50,7 +50,7 @@ export const deleteCategoria = async (req: Request, res: Response) => {
     res.json({ message: 'Categoría y sus productos deshabilitados con éxito', categoria });
   } catch (error) {
     console.error('Error eliminando categoria:', error);
-    res.status(500).json({ error: 'Error al eliminar categoria' });
+    res.status(500).json({ message: (error as Error).message || 'Error al eliminar categoria' });
   }
 };
 
@@ -78,7 +78,7 @@ export const updateCategoria = async (req: Request, res: Response) => {
       res.status(400).json({ error: 'La categoría ya existe.' });
       return;
     }
-    res.status(500).json({ error: 'Error al actualizar categoria' });
+    res.status(500).json({ message: (error as Error).message || 'Error al actualizar categoria' });
   }
 };
 
@@ -90,7 +90,7 @@ export const getProductos = async (req: Request, res: Response) => {
     res.json(productos);
   } catch (error) {
     console.error('Error obteniendo productos:', error);
-    res.status(500).json({ error: 'Error al obtener productos' });
+    res.status(500).json({ message: (error as Error).message || 'Error al obtener productos' });
   }
 };
 
@@ -109,7 +109,7 @@ export const createProducto = async (req: Request, res: Response) => {
     res.status(201).json(nuevoProducto);
   } catch (error) {
     console.error('Error creando producto:', error);
-    res.status(500).json({ error: 'Error al crear producto' });
+    res.status(500).json({ message: (error as Error).message || 'Error al crear producto' });
   }
 };
 
@@ -132,7 +132,7 @@ export const updateProducto = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error actualizando producto:', error);
-    res.status(500).json({ error: 'Error al actualizar producto' });
+    res.status(500).json({ message: (error as Error).message || 'Error al actualizar producto' });
   }
 };
 
@@ -151,7 +151,7 @@ export const deleteProducto = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Producto e historial eliminados correctamente' });
   } catch (error) {
     console.error('Error eliminando producto:', error);
-    res.status(500).json({ error: 'Error al eliminar producto' });
+    res.status(500).json({ message: (error as Error).message || 'Error al eliminar producto' });
   }
 };
 
@@ -178,6 +178,6 @@ export const updateEstadoProducto = async (req: Request, res: Response) => {
     res.json({ message: 'Estado del producto actualizado con éxito', producto: productoActualizado });
   } catch (error) {
     console.error('Error actualizando estado del producto:', error);
-    res.status(500).json({ error: 'Error al actualizar estado del producto' });
+    res.status(500).json({ message: (error as Error).message || 'Error al actualizar estado del producto' });
   }
 };

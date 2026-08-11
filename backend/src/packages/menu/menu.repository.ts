@@ -47,6 +47,8 @@ export const getProductos = async (incluirInactivos: boolean = false) => {
   const categoriasMap = new Map();
   catResult.rows.forEach((c: any) => categoriasMap.set(c.id, c.nombre));
 
+  if (!firestore) throw new Error('Firestore no está inicializado. Verifica firebase-key.json');
+
   let query: Query = firestore.collection('productos');
   if (!incluirInactivos) {
     query = query.where('disponible', '==', true);
@@ -69,6 +71,8 @@ export const getProductosByCategoria = async (categoria_id: number) => {
   const catResult = await pool.query('SELECT nombre FROM categorias WHERE id = $1', [categoria_id]);
   const categoria_nombre = catResult.rows.length > 0 ? catResult.rows[0].nombre : 'Sin categoría';
 
+  if (!firestore) throw new Error('Firestore no está inicializado.');
+
   const snapshot = await firestore.collection('productos')
     .where('categoria_id', '==', categoria_id)
     .where('disponible', '==', true)
@@ -82,6 +86,7 @@ export const getProductosByCategoria = async (categoria_id: number) => {
 };
 
 export const createProducto = async (categoria_id: number, nombre: string, descripcion: string, precio: number) => {
+  if (!firestore) throw new Error('Firestore no está inicializado.');
   const newRef = firestore.collection('productos').doc();
   const data = {
     categoria_id,
@@ -96,6 +101,7 @@ export const createProducto = async (categoria_id: number, nombre: string, descr
 };
 
 export const updateProducto = async (id: string, data: any) => {
+  if (!firestore) throw new Error('Firestore no está inicializado.');
   const docRef = firestore.collection('productos').doc(id);
   const doc = await docRef.get();
   if (!doc.exists) return null;
@@ -106,6 +112,7 @@ export const updateProducto = async (id: string, data: any) => {
 };
 
 export const deleteProducto = async (id: string) => {
+  if (!firestore) throw new Error('Firestore no está inicializado.');
   const docRef = firestore.collection('productos').doc(id);
   const doc = await docRef.get();
   if (!doc.exists) return null;

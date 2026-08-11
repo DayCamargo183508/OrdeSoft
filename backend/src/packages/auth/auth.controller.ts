@@ -66,6 +66,6 @@ export const loginWithPin = async (req: Request, res: Response): Promise<void> =
 
   } catch (error) {
     console.error('Error en loginWithPin:', error);
-    res.status(500).json({ error: 'Error interno del servidor.' });
+    res.status(500).json({ message: (error as Error).message || 'Error interno del servidor.' });
   }
 };

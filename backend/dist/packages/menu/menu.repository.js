@@ -46,6 +46,8 @@ const getProductos = async (incluirInactivos = false) => {
     const catResult = await db_1.default.query('SELECT id, nombre FROM categorias');
     const categoriasMap = new Map();
     catResult.rows.forEach((c) => categoriasMap.set(c.id, c.nombre));
+    if (!firebase_1.firestore)
+        throw new Error('Firestore no está inicializado. Verifica firebase-key.json');
     let query = firebase_1.firestore.collection('productos');
     if (!incluirInactivos) {
         query = query.where('disponible', '==', true);
@@ -65,6 +67,8 @@ exports.getProductos = getProductos;
 const getProductosByCategoria = async (categoria_id) => {
     const catResult = await db_1.default.query('SELECT nombre FROM categorias WHERE id = $1', [categoria_id]);
     const categoria_nombre = catResult.rows.length > 0 ? catResult.rows[0].nombre : 'Sin categoría';
+    if (!firebase_1.firestore)
+        throw new Error('Firestore no está inicializado.');
     const snapshot = await firebase_1.firestore.collection('productos')
         .where('categoria_id', '==', categoria_id)
         .where('disponible', '==', true)
@@ -77,6 +81,8 @@ const getProductosByCategoria = async (categoria_id) => {
 };
 exports.getProductosByCategoria = getProductosByCategoria;
 const createProducto = async (categoria_id, nombre, descripcion, precio) => {
+    if (!firebase_1.firestore)
+        throw new Error('Firestore no está inicializado.');
     const newRef = firebase_1.firestore.collection('productos').doc();
     const data = {
         categoria_id,
@@ -91,6 +97,8 @@ const createProducto = async (categoria_id, nombre, descripcion, precio) => {
 };
 exports.createProducto = createProducto;
 const updateProducto = async (id, data) => {
+    if (!firebase_1.firestore)
+        throw new Error('Firestore no está inicializado.');
     const docRef = firebase_1.firestore.collection('productos').doc(id);
     const doc = await docRef.get();
     if (!doc.exists)
@@ -101,6 +109,8 @@ const updateProducto = async (id, data) => {
 };
 exports.updateProducto = updateProducto;
 const deleteProducto = async (id) => {
+    if (!firebase_1.firestore)
+        throw new Error('Firestore no está inicializado.');
     const docRef = firebase_1.firestore.collection('productos').doc(id);
     const doc = await docRef.get();
     if (!doc.exists)
