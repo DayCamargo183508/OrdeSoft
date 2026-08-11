@@ -1,0 +1,6566 @@
+ORDERSOFT - REFERENCIA TECNICA Y BITACORA DE MANTENIMIENTO
+==========================================================
+Documento de referencia no ejecutable.
+Objetivo: concentrar notas tecnicas, estructura, procedimientos, comprobaciones y plantillas de mantenimiento del proyecto OrderSoft.
+Este archivo no debe importarse desde el backend ni desde el frontend y no modifica el comportamiento de la aplicacion.
+Fecha de preparacion: 2026-08-11
+----------------------------------------------------------------
+1. CONTEXTO GENERAL
+----------------------------------------------------------------
+OrderSoft es un proyecto dividido en dos componentes principales:
+- backend
+- frontend
+De acuerdo con la estructura revisada, el backend utiliza Node.js y TypeScript.
+El frontend corresponde a una aplicacion Flutter/Dart.
+El repositorio incluye configuracion para una base de datos y archivos de migracion.
+Archivos y carpetas observados en el backend:
+- src/
+- node_modules/
+- docker-compose.yml
+- package.json
+- package-lock.json
+- schema.sql
+- run_migration.js
+- run_migration_pnj.js
+- tsconfig.json
+- .gitignore
+Dependencias observadas en package.json del backend:
+- bcryptjs
+- cors
+- dotenv
+- express
+- jsonwebtoken
+- pg
+Dependencias de desarrollo observadas:
+- @types/bcryptjs
+- @types/cors
+- @types/express
+- @types/jsonwebtoken
+- @types/node
+- @types/pg
+- tsx
+- typescript
+Scripts observados en package.json:
+- npm run dev  -> tsx watch src/app.ts
+- npm run build -> tsc
+- npm start -> node --enable-source-maps dist/app.js
+----------------------------------------------------------------
+2. PRINCIPIOS PARA TRABAJAR CON EL REPOSITORIO
+----------------------------------------------------------------
+Antes de comenzar una sesion de trabajo:
+1. Abrir la copia del proyecto que contiene la carpeta .git.
+2. Confirmar la rama actual.
+3. Descargar cambios recientes.
+4. Verificar que no existan modificaciones locales inesperadas.
+Comandos de referencia:
+git status
+git branch
+git pull origin main
+Al terminar una sesion:
+git status
+git add .
+git commit -m "descripcion clara del cambio"
+git push origin main
+Regla de mantenimiento:
+- No editar archivos generados cuando exista una fuente original equivalente.
+- No subir credenciales ni secretos.
+- No modificar dependencias sin documentar el motivo.
+- No hacer cambios funcionales sin una prueba minima de ejecucion.
+----------------------------------------------------------------
+3. EJECUCION LOCAL DEL BACKEND
+----------------------------------------------------------------
+Ruta esperada de trabajo: carpeta backend.
+Procedimiento base:
+1. Abrir una terminal.
+2. Entrar a backend.
+3. Verificar package.json.
+4. Instalar dependencias si hace falta.
+5. Levantar servicios de infraestructura.
+6. Ejecutar el servidor en modo desarrollo.
+Comandos:
+cd backend
+npm install
+docker compose up -d
+docker compose ps
+npm run dev
+Para compilar TypeScript:
+npm run build
+Para iniciar la salida compilada:
+npm start
+----------------------------------------------------------------
+4. EJECUCION LOCAL DEL FRONTEND
+----------------------------------------------------------------
+El frontend corresponde a Flutter.
+Antes de ejecutarlo se recomienda verificar la instalacion de Flutter y los dispositivos disponibles.
+Comandos de referencia:
+flutter doctor
+flutter pub get
+flutter devices
+Ejemplos de ejecucion:
+flutter run -d windows
+flutter run -d chrome
+Nota:
+El dispositivo exacto depende de los targets habilitados en el equipo.
+----------------------------------------------------------------
+5. CONTROL DE VERSIONES
+----------------------------------------------------------------
+Conceptos basicos:
+- working tree: archivos actuales del proyecto.
+- staging area: cambios seleccionados con git add.
+- commit: registro local de un conjunto de cambios.
+- remote: repositorio remoto.
+- origin: nombre habitual del remoto principal.
+- main: rama principal observada durante el trabajo.
+Comprobaciones utiles:
+git status
+git log --oneline -10
+git remote -v
+git diff
+git diff --staged
+Para descargar cambios:
+git pull origin main
+Para subir cambios:
+git push origin main
+----------------------------------------------------------------
+6. BASE DE DATOS E INFRAESTRUCTURA
+----------------------------------------------------------------
+El backend incluye:
+- docker-compose.yml
+- schema.sql
+- scripts de migracion
+- dependencia pg
+Esto indica un flujo de trabajo apoyado en PostgreSQL y scripts de inicializacion/migracion.
+Comprobaciones recomendadas:
+- Confirmar que Docker Desktop este iniciado.
+- Confirmar que los contenedores esten arriba.
+- Confirmar puertos utilizados.
+- Confirmar variables de entorno requeridas.
+- Confirmar que el esquema exista.
+- Confirmar que las migraciones se hayan aplicado.
+Comandos de apoyo:
+docker compose up -d
+docker compose ps
+docker compose logs
+docker compose down
+----------------------------------------------------------------
+7. SEGURIDAD Y CONFIGURACION
+----------------------------------------------------------------
+Dependencias como bcryptjs y jsonwebtoken indican que el backend contempla autenticacion o manejo de credenciales/tokens.
+Buenas practicas:
+- Nunca guardar contraseñas en texto plano.
+- Nunca incluir claves privadas en el repositorio.
+- Mantener .env fuera de commits cuando contenga secretos.
+- Revisar .gitignore antes de subir cambios.
+- Rotar credenciales expuestas.
+- Limitar informacion sensible en logs.
+----------------------------------------------------------------
+8. LISTA DE VERIFICACION RAPIDA
+----------------------------------------------------------------
+01. [ ] El repositorio abre sin errores de ruta.
+02. [ ] git status reconoce la carpeta como repositorio.
+03. [ ] La rama activa es la esperada.
+04. [ ] El remoto origin apunta al repositorio correcto.
+05. [ ] El backend tiene package.json.
+06. [ ] El backend tiene tsconfig.json.
+07. [ ] El backend puede instalar dependencias.
+08. [ ] Docker esta disponible.
+09. [ ] docker compose reconoce el archivo de configuracion.
+10. [ ] La base de datos inicia.
+11. [ ] El backend compila con TypeScript.
+12. [ ] El backend inicia en modo desarrollo.
+13. [ ] El frontend tiene pubspec.yaml.
+14. [ ] Flutter reconoce el proyecto.
+15. [ ] flutter pub get termina correctamente.
+16. [ ] Flutter detecta al menos un dispositivo.
+17. [ ] El frontend inicia.
+18. [ ] No hay secretos nuevos en git status.
+19. [ ] No hay archivos temporales innecesarios en staging.
+20. [ ] El commit tiene un mensaje descriptivo.
+21. [ ] El push termina sin conflictos.
+----------------------------------------------------------------
+9. GUIA DE DIAGNOSTICO
+----------------------------------------------------------------
+CASO: fatal: not a git repository
+  1. Confirmar la carpeta actual con Get-Location.
+  2. Buscar una carpeta .git en el directorio o sus padres.
+  3. Si el proyecto fue descargado como ZIP, clonar el repositorio en una carpeta nueva.
+  4. Evitar ejecutar git init sobre una copia que debe conservar el historial remoto.
+CASO: destination path already exists
+  1. La carpeta indicada para git clone ya existe.
+  2. Entrar a esa carpeta si ya contiene el clon correcto.
+  3. Usar git status para verificar.
+  4. No volver a clonar innecesariamente.
+CASO: Everything up-to-date
+  1. No hay commits locales pendientes de enviar.
+  2. Revisar git log si se esperaba un cambio nuevo.
+  3. Confirmar que se esta usando la rama correcta.
+CASO: Already up to date
+  1. El repositorio local ya contiene la ultima version del remoto.
+  2. No es necesario volver a clonar.
+CASO: Docker no inicia
+  1. Abrir Docker Desktop.
+  2. Esperar a que el motor este listo.
+  3. Ejecutar docker version.
+  4. Ejecutar docker compose ps.
+CASO: Flutter no detecta dispositivo
+  1. Ejecutar flutter devices.
+  2. Confirmar que Windows/Chrome/Android esten configurados.
+  3. Ejecutar flutter doctor y revisar advertencias.
+----------------------------------------------------------------
+10. REGISTRO DE CAMBIOS - PLANTILLA
+----------------------------------------------------------------
+Usar esta plantilla cuando se quiera documentar una modificacion real:
+Fecha:
+Autor:
+Modulo:
+Archivo(s):
+Objetivo:
+Descripcion del cambio:
+Motivo:
+Prueba realizada:
+Resultado:
+Riesgos:
+Rollback:
+Commit:
+----------------------------------------------------------------
+11. MATRIZ DE PRUEBAS MANUALES
+----------------------------------------------------------------
+Las siguientes entradas son plantillas de verificacion.
+No afirman que una funcionalidad concreta exista; sirven para registrar pruebas reales cuando correspondan.
+PRUEBA 001
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 002
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 003
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 004
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 005
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 006
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 007
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 008
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 009
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 010
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 011
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 012
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 013
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 014
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 015
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 016
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 017
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 018
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 019
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 020
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 021
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 022
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 023
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 024
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 025
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 026
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 027
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 028
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 029
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 030
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 031
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 032
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 033
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 034
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 035
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 036
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 037
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 038
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 039
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 040
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 041
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 042
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 043
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 044
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 045
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 046
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 047
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 048
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 049
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 050
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 051
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 052
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 053
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 054
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 055
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 056
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 057
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 058
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 059
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 060
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 061
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 062
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 063
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 064
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 065
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 066
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 067
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 068
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 069
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 070
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 071
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 072
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 073
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 074
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 075
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 076
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 077
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 078
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 079
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 080
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 081
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 082
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 083
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 084
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 085
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 086
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 087
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 088
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 089
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 090
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 091
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 092
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 093
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 094
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 095
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 096
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 097
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 098
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 099
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 100
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 101
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 102
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 103
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 104
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 105
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 106
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 107
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 108
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 109
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 110
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 111
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 112
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 113
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 114
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 115
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 116
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 117
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 118
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 119
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 120
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 121
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 122
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 123
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 124
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 125
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 126
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 127
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 128
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 129
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 130
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 131
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 132
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 133
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 134
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 135
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 136
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 137
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 138
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 139
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 140
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 141
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 142
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 143
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 144
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 145
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 146
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 147
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 148
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 149
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 150
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 151
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 152
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 153
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 154
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 155
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 156
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 157
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 158
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 159
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 160
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 161
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 162
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 163
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 164
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 165
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 166
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 167
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 168
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 169
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 170
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 171
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 172
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 173
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 174
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 175
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 176
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 177
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 178
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 179
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 180
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 181
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 182
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 183
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 184
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 185
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 186
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 187
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 188
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 189
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 190
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 191
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 192
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 193
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 194
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 195
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 196
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 197
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 198
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 199
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 200
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 201
+Area: inicio de aplicacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 202
+Area: conexion backend
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 203
+Area: conexion base de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 204
+Area: autenticacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 205
+Area: navegacion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 206
+Area: formularios
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 207
+Area: validacion de campos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 208
+Area: manejo de errores
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 209
+Area: listados
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 210
+Area: busqueda
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 211
+Area: filtros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 212
+Area: actualizacion de datos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 213
+Area: creacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 214
+Area: eliminacion de registros
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 215
+Area: sesion
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 216
+Area: permisos
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 217
+Area: respuesta HTTP
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 218
+Area: persistencia
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 219
+Area: interfaz
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+PRUEBA 220
+Area: recuperacion ante fallo
+Precondicion: definir segun el escenario real.
+Paso 1: preparar el entorno.
+Paso 2: ejecutar la accion correspondiente.
+Paso 3: observar la respuesta.
+Resultado esperado: documentar antes de ejecutar.
+Resultado obtenido: pendiente de captura durante la prueba.
+Estado: [ ] Pendiente  [ ] Correcta  [ ] Fallo
+Observaciones:
+----------------------------------------------------------------
+12. CHECKLIST DE REVISION DE ARCHIVOS
+----------------------------------------------------------------
+REVISION 01
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 02
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 03
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 04
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 05
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 06
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 07
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 08
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 09
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 10
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 11
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 12
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 13
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 14
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 15
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 16
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 17
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 18
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 19
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 20
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 21
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 22
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 23
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 24
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 25
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 26
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 27
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 28
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 29
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+REVISION 30
+  01. [ ] Nombre del archivo coherente con su responsabilidad.
+  02. [ ] No contiene credenciales reales.
+  03. [ ] No contiene rutas absolutas personales.
+  04. [ ] No contiene codigo comentado innecesario.
+  05. [ ] No introduce dependencias sin justificar.
+  06. [ ] Mantiene convenciones de formato.
+  07. [ ] Evita duplicacion evidente.
+  08. [ ] Tiene manejo de errores cuando corresponde.
+  09. [ ] Las funciones tienen nombres descriptivos.
+  10. [ ] Las variables tienen nombres comprensibles.
+  11. [ ] Los comentarios explican decisiones, no lo obvio.
+  12. [ ] Los imports utilizados son necesarios.
+  13. [ ] No quedan logs de depuracion permanentes.
+  14. [ ] No quedan TODO criticos sin registrar.
+  15. [ ] El archivo compila o es reconocido por su herramienta.
+  16. [ ] Las modificaciones estan cubiertas por una prueba minima.
+  17. [ ] La salida esperada fue validada.
+  18. [ ] No modifica areas no relacionadas.
+  19. [ ] El diff fue revisado antes del commit.
+  20. [ ] El commit resultante es entendible.
+----------------------------------------------------------------
+13. PLANTILLA DE REVISION DE ENDPOINTS
+----------------------------------------------------------------
+Esta seccion es una plantilla y debe llenarse solamente con endpoints que existan realmente.
+ENDPOINT-REF-001
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-002
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-003
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-004
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-005
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-006
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-007
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-008
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-009
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-010
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-011
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-012
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-013
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-014
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-015
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-016
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-017
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-018
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-019
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-020
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-021
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-022
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-023
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-024
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-025
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-026
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-027
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-028
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-029
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-030
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-031
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-032
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-033
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-034
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-035
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-036
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-037
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-038
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-039
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-040
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-041
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-042
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-043
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-044
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-045
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-046
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-047
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-048
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-049
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-050
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-051
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-052
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-053
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-054
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-055
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-056
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-057
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-058
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-059
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-060
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-061
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-062
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-063
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-064
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-065
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-066
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-067
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-068
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-069
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-070
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-071
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-072
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-073
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-074
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-075
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-076
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-077
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-078
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-079
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-080
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-081
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-082
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-083
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-084
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-085
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-086
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-087
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-088
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-089
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-090
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-091
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-092
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-093
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-094
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-095
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-096
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-097
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-098
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-099
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+ENDPOINT-REF-100
+Metodo:
+Ruta:
+Objetivo:
+Autenticacion requerida:
+Datos de entrada:
+Respuesta esperada:
+Errores esperados:
+Prueba realizada:
+Resultado:
+----------------------------------------------------------------
+14. PLANTILLA DE REVISION DE PANTALLAS FLUTTER
+----------------------------------------------------------------
+Registrar solo pantallas que existan realmente en el proyecto.
+PANTALLA-REF-001
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-002
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-003
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-004
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-005
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-006
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-007
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-008
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-009
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-010
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-011
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-012
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-013
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-014
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-015
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-016
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-017
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-018
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-019
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-020
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-021
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-022
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-023
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-024
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-025
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-026
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-027
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-028
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-029
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-030
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-031
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-032
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-033
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-034
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-035
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-036
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-037
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-038
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-039
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-040
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-041
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-042
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-043
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-044
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-045
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-046
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-047
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-048
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-049
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-050
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-051
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-052
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-053
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-054
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-055
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-056
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-057
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-058
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-059
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-060
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-061
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-062
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-063
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-064
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-065
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-066
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-067
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-068
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-069
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-070
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-071
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-072
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-073
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-074
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-075
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-076
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-077
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-078
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-079
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-080
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-081
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-082
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-083
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-084
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-085
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-086
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-087
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-088
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-089
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-090
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-091
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-092
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-093
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-094
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-095
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-096
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-097
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-098
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-099
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+PANTALLA-REF-100
+Nombre:
+Ruta/clase:
+Objetivo:
+Datos mostrados:
+Acciones disponibles:
+Validaciones:
+Dependencias:
+Prueba manual:
+Resultado:
+----------------------------------------------------------------
+15. BITACORA DE SESION - PLANTILLAS
+----------------------------------------------------------------
+SESION 001
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 002
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 003
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 004
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 005
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 006
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 007
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 008
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 009
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 010
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 011
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 012
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 013
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 014
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 015
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 016
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 017
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 018
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 019
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 020
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 021
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 022
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 023
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 024
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 025
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 026
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 027
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 028
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 029
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 030
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 031
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 032
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 033
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 034
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 035
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 036
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 037
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 038
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 039
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 040
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 041
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 042
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 043
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 044
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 045
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 046
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 047
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 048
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 049
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 050
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 051
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 052
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 053
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 054
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 055
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 056
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 057
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 058
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 059
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 060
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 061
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 062
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 063
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 064
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 065
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 066
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 067
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 068
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 069
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 070
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 071
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 072
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 073
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 074
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 075
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 076
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 077
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 078
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 079
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 080
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 081
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 082
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 083
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 084
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 085
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 086
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 087
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 088
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 089
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 090
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 091
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 092
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 093
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 094
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 095
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 096
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 097
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 098
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 099
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 100
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 101
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 102
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 103
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 104
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 105
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 106
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 107
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 108
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 109
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 110
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 111
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 112
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 113
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 114
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 115
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 116
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 117
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 118
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 119
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+SESION 120
+Fecha:
+Objetivo de la sesion:
+Cambios descargados antes de iniciar:
+Archivos revisados:
+Cambios realizados:
+Comandos utilizados:
+Pruebas ejecutadas:
+Problemas encontrados:
+Solucion aplicada:
+Estado final:
+Commit asociado:
+----------------------------------------------------------------
+16. REFERENCIA DE COMANDOS
+----------------------------------------------------------------
+Git:
+git status
+git branch
+git pull origin main
+git add .
+git commit -m "mensaje"
+git push origin main
+git log --oneline -10
+git remote -v
+git diff
+Node / npm:
+npm install
+npm run
+npm run dev
+npm run build
+npm start
+Docker:
+docker compose up -d
+docker compose ps
+docker compose logs
+docker compose down
+Flutter:
+flutter doctor
+flutter pub get
+flutter devices
+flutter run -d windows
+flutter run -d chrome
+PowerShell:
+Get-Location
+Get-ChildItem -Force
+Set-Location -LiteralPath <ruta>
+----------------------------------------------------------------
+17. NOTAS DE MANTENIMIENTO
+----------------------------------------------------------------
+1. Trabajar siempre sobre una copia clonada con Git.
+2. Descargar cambios antes de comenzar.
+3. Evitar modificar simultaneamente el mismo archivo entre integrantes.
+4. Revisar git status antes y despues de cada cambio.
+5. Probar backend y frontend cuando el cambio pueda afectarlos.
+6. Mantener el repositorio libre de secretos.
+7. Documentar cambios de configuracion.
+8. Evitar commits gigantes sin motivo.
+9. Mantener mensajes de commit descriptivos.
+10. No usar archivos de documentacion como sustituto de pruebas reales.
+----------------------------------------------------------------
+18. FIN DEL DOCUMENTO
+----------------------------------------------------------------
+Este archivo es una referencia tecnica y una coleccion de plantillas de mantenimiento.
+No forma parte del runtime de OrderSoft.
+No debe importarse ni ejecutarse desde backend o frontend.
