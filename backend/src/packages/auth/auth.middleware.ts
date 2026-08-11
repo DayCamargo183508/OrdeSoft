@@ -21,10 +21,18 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
   }
 
   const token = authHeader.split(' ')[1];
-  const secret = process.env.JWT_SECRET || 'secret_de_respaldo';
+
+  if (!token) {
+    res.status(401).json({ error: 'Token malformado o ausente en el header.' });
+    return;
+  }
 
   try {
-    const decoded = jwt.verify(token, secret) as { id: number; rol: string };
+    const decoded = jwt.verify(
+      token,
+      (process.env.JWT_SECRET || 'secret_de_respaldo') as string
+    ) as unknown as { id: number; rol: string };
+    
     req.user = decoded;
     next();
   } catch (error) {
