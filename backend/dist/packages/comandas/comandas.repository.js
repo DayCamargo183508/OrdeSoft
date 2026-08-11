@@ -17,7 +17,7 @@ const crearComandaTransaccional = async (mesa_id, tipo_orden, nombre_cliente, us
         for (const detalle of detalles) {
             const subtotal = detalle.cantidad * detalle.precio_unitario;
             totalComanda += subtotal;
-            await client.query('INSERT INTO comanda_detalles (comanda_id, producto_id, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [comandaId, detalle.producto_id, detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']);
+            await client.query('INSERT INTO comanda_detalles (comanda_id, producto_id, producto_nombre, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [comandaId, detalle.producto_id, detalle.producto_nombre || 'Producto', detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']);
         }
         // 3. Actualizar total de la comanda
         await client.query('UPDATE comandas SET total = $1 WHERE id = $2', [totalComanda, comandaId]);
@@ -49,7 +49,7 @@ const agregarDetallesComandaTransaccional = async (comanda_id, detalles) => {
         for (const detalle of detalles) {
             const subtotal = detalle.cantidad * detalle.precio_unitario;
             totalAdicional += subtotal;
-            await client.query('INSERT INTO comanda_detalles (comanda_id, producto_id, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)', [comanda_id, detalle.producto_id, detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']);
+            await client.query('INSERT INTO comanda_detalles (comanda_id, producto_id, producto_nombre, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [comanda_id, detalle.producto_id, detalle.producto_nombre || 'Producto', detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']);
         }
         await client.query('UPDATE comandas SET total = total + $1 WHERE id = $2', [totalAdicional, comanda_id]);
         await client.query('COMMIT');
@@ -74,7 +74,7 @@ const obtenerComandaPorId = async (id) => {
         return null;
     const comanda = comandaResult.rows[0];
     // Detalles
-    const detallesResult = await db_1.default.query("SELECT d.*, p.nombre as producto_nombre FROM comanda_detalles d LEFT JOIN productos p ON d.producto_id = p.id WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [id]);
+    const detallesResult = await db_1.default.query("SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [id]);
     comanda.total = parseFloat(comanda.total);
     comanda.detalles = detallesResult.rows.map(d => ({
         ...d,
@@ -99,7 +99,7 @@ const obtenerComandasParaLlevar = async () => {
      WHERE c.tipo_orden = $1 AND c.estado NOT IN ($2, $3) 
      ORDER BY c.created_at DESC`, ['PARA_LLEVAR', 'pagado', 'cancelado']);
     const comandas = await Promise.all(result.rows.map(async (c) => {
-        const detallesResult = await db_1.default.query("SELECT d.*, p.nombre as producto_nombre FROM comanda_detalles d LEFT JOIN productos p ON d.producto_id = p.id WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [c.id]);
+        const detallesResult = await db_1.default.query("SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [c.id]);
         return {
             ...c,
             total: parseFloat(c.total),
@@ -142,10 +142,9 @@ const obtenerTicketCocina = async (comanda_id) => {
     if (cabeceraQuery.rows.length === 0)
         return null;
     const cabecera = cabeceraQuery.rows[0];
-    const detallesQuery = await db_1.default.query(`SELECT d.cantidad, p.nombre as producto, d.notas 
+    const detallesQuery = await db_1.default.query(`SELECT d.cantidad, d.producto_nombre as producto, d.notas 
      FROM comanda_detalles d 
-     JOIN productos p ON d.producto_id = p.id 
-     WHERE d.comanda_id = $1 AND p.tipo = 'comida'`, [comanda_id]);
+     WHERE d.comanda_id = $1`, [comanda_id]);
     return { cabecera, detalles: detallesQuery.rows };
 };
 exports.obtenerTicketCocina = obtenerTicketCocina;

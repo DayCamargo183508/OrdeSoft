@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
@@ -12,10 +12,19 @@ class ApiClient {
   }
 
   String get baseUrl {
-    if (kIsWeb || Platform.isWindows || Platform.isMacOS) {
+    if (kReleaseMode) {
+      return 'https://ordersoft-backend.onrender.com/api';
+    }
+
+    if (kIsWeb) {
       return 'http://127.0.0.1:3500/api';
     }
-    return 'http://10.0.2.2:3500/api';
+    
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:3500/api';
+    }
+
+    return 'http://127.0.0.1:3500/api';
   }
 
   ApiClient._internal() {

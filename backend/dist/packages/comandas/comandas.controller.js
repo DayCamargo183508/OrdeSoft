@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.obtenerTicketCocina = exports.pagarCuenta = exports.pagarComanda = exports.crearComanda = exports.obtenerPorId = exports.obtenerParaLlevar = exports.obtenerActivas = void 0;
 const ComandasRepository = __importStar(require("./comandas.repository"));
 const db_1 = __importDefault(require("../../config/db"));
+const firebase_1 = require("../../config/firebase");
 const obtenerActivas = async (req, res) => {
     try {
         const comandas = await ComandasRepository.obtenerComandasActivas();
@@ -123,17 +124,19 @@ const crearComanda = async (req, res) => {
                 res.status(400).json({ error: 'Formato de detalle inválido.' });
                 return;
             }
-            // Obtener el precio base si el frontend no envió un precio unitario final
-            const prodQuery = await db_1.default.query('SELECT precio FROM productos WHERE id = $1 AND disponible = true', [d.producto_id]);
-            if (prodQuery.rows.length === 0) {
+            // Obtener el precio base y nombre si el frontend no envió un precio unitario final
+            const prodRef = await firebase_1.firestore.collection('productos').doc(d.producto_id).get();
+            if (!prodRef.exists || !prodRef.data()?.disponible) {
                 res.status(400).json({ error: `El producto con ID ${d.producto_id} no existe o no está disponible.` });
                 return;
             }
+            const prodData = prodRef.data();
             const precioUnitario = d.precio_unitario !== undefined && d.precio_unitario !== null
                 ? Number(d.precio_unitario)
-                : Number(prodQuery.rows[0].precio);
+                : Number(prodData?.precio);
             detallesFormateados.push({
                 producto_id: d.producto_id,
+                producto_nombre: prodData?.nombre || 'Producto',
                 cantidad: d.cantidad,
                 precio_unitario: precioUnitario,
                 notas: d.notas,

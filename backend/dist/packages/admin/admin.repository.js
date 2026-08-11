@@ -150,19 +150,18 @@ exports.AdminRepository = {
         COALESCE(
           json_agg(
             json_build_object(
-              'nombre', p.nombre,
+              'nombre', cd.producto_nombre,
               'cantidad', cd.cantidad,
               'precio_unitario', cd.precio_unitario,
               'subtotal', cd.subtotal
             )
-          ) FILTER (WHERE p.id IS NOT NULL),
+          ) FILTER (WHERE cd.id IS NOT NULL),
           '[]'
         ) as items
       FROM comandas c
       LEFT JOIN mesas m ON c.mesa_id = m.id
       JOIN usuarios u ON c.usuario_id = u.id
       LEFT JOIN comanda_detalles cd ON c.id = cd.comanda_id
-      LEFT JOIN productos p ON cd.producto_id = p.id
       WHERE c.estado = 'pagado'
         AND DATE(c.created_at) = CURRENT_DATE
       GROUP BY c.id, m.numero, u.nombre, c.tipo_orden, c.nombre_cliente, c.created_at
@@ -170,18 +169,16 @@ exports.AdminRepository = {
     `;
         const queryArticulos = `
       SELECT 
-        p.id as producto_id,
-        p.nombre,
-        cat.nombre as categoria,
+        cd.producto_id as producto_id,
+        cd.producto_nombre as nombre,
+        'General' as categoria,
         SUM(cd.cantidad) as cantidad_vendida,
         SUM(cd.subtotal) as total_generado
       FROM comandas c
       JOIN comanda_detalles cd ON c.id = cd.comanda_id
-      JOIN productos p ON cd.producto_id = p.id
-      LEFT JOIN categorias cat ON p.categoria_id = cat.id
       WHERE c.estado = 'pagado'
         AND DATE(c.created_at) = CURRENT_DATE
-      GROUP BY p.id, p.nombre, cat.nombre
+      GROUP BY cd.producto_id, cd.producto_nombre
       ORDER BY cantidad_vendida DESC
     `;
         const [resGeneral, resDesglose, resDetalle, resArticulos] = await Promise.all([

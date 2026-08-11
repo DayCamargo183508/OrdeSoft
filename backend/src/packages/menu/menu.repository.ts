@@ -1,4 +1,6 @@
 import pool from '../../config/db';
+import { firestore } from '../../config/firebase';
+import { Query } from 'firebase-admin/firestore';
 
 // --- CATEGORIAS ---
 export const getCategorias = async () => {
@@ -38,93 +40,85 @@ export const updateCategoria = async (id: number, nombre: string) => {
   return result.rows[0];
 };
 
-// --- PRODUCTOS ---
+// --- PRODUCTOS (Firebase Firestore) ---
 export const getProductos = async (incluirInactivos: boolean = false) => {
-  let query = `
-    SELECT p.*, c.nombre as categoria_nombre 
-    FROM productos p 
-    LEFT JOIN categorias c ON p.categoria_id = c.id 
-  `;
+  // Obtenemos todas las categorías de Postgres para cruzar los nombres (Join manual)
+  const catResult = await pool.query('SELECT id, nombre FROM categorias');
+  const categoriasMap = new Map();
+  catResult.rows.forEach((c: any) => categoriasMap.set(c.id, c.nombre));
+
+  let query: Query = firestore.collection('productos');
   if (!incluirInactivos) {
-    query += ` WHERE p.disponible = true`;
+    query = query.where('disponible', '==', true);
   }
-  query += ` ORDER BY p.id ASC`;
-  const result = await pool.query(query);
-  return result.rows;
+
+  const snapshot = await query.get();
+  const productos = snapshot.docs.map((doc: any) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      categoria_nombre: categoriasMap.get(data.categoria_id) || 'Sin categoría'
+    };
+  });
+  
+  return productos.sort((a: any, b: any) => (a.created_at || '').localeCompare(b.created_at || ''));
 };
 
 export const getProductosByCategoria = async (categoria_id: number) => {
-  const query = `
-    SELECT p.*, c.nombre as categoria_nombre 
-    FROM productos p 
-    LEFT JOIN categorias c ON p.categoria_id = c.id 
-    WHERE p.categoria_id = $1 AND p.disponible = true
-    ORDER BY p.nombre ASC
-  `;
-  const result = await pool.query(query, [categoria_id]);
-  return result.rows;
+  const catResult = await pool.query('SELECT nombre FROM categorias WHERE id = $1', [categoria_id]);
+  const categoria_nombre = catResult.rows.length > 0 ? catResult.rows[0].nombre : 'Sin categoría';
+
+  const snapshot = await firestore.collection('productos')
+    .where('categoria_id', '==', categoria_id)
+    .where('disponible', '==', true)
+    .get();
+
+  return snapshot.docs.map((doc: any) => ({
+    id: doc.id,
+    ...doc.data(),
+    categoria_nombre
+  }));
 };
 
 export const createProducto = async (categoria_id: number, nombre: string, descripcion: string, precio: number) => {
-  const result = await pool.query(
-    'INSERT INTO productos (categoria_id, nombre, descripcion, precio) VALUES ($1, $2, $3, $4) RETURNING *',
-    [categoria_id, nombre, descripcion, precio]
-  );
-  return result.rows[0];
+  const newRef = firestore.collection('productos').doc();
+  const data = {
+    categoria_id,
+    nombre,
+    descripcion,
+    precio,
+    disponible: true,
+    created_at: new Date().toISOString()
+  };
+  await newRef.set(data);
+  return { id: newRef.id, ...data };
 };
 
-export const updateProducto = async (id: number, data: { categoria_id?: number, nombre?: string, descripcion?: string, precio?: number, disponible?: boolean }) => {
-  const updates = [];
-  const values = [];
-  let index = 1;
+export const updateProducto = async (id: string, data: any) => {
+  const docRef = firestore.collection('productos').doc(id);
+  const doc = await docRef.get();
+  if (!doc.exists) return null;
 
-  if (data.categoria_id !== undefined) {
-    updates.push(`categoria_id = $${index++}`);
-    values.push(data.categoria_id);
-  }
-  if (data.nombre !== undefined) {
-    updates.push(`nombre = $${index++}`);
-    values.push(data.nombre);
-  }
-  if (data.descripcion !== undefined) {
-    updates.push(`descripcion = $${index++}`);
-    values.push(data.descripcion);
-  }
-  if (data.precio !== undefined) {
-    updates.push(`precio = $${index++}`);
-    values.push(data.precio);
-  }
-  if (data.disponible !== undefined) {
-    updates.push(`disponible = $${index++}`);
-    values.push(data.disponible);
-  }
+  await docRef.update(data);
+  const updated = await docRef.get();
+  return { id: updated.id, ...updated.data() };
+};
 
-  if (updates.length === 0) return null;
-
-  values.push(id);
-  const query = `UPDATE productos SET ${updates.join(', ')} WHERE id = $${index} RETURNING *`;
+export const deleteProducto = async (id: string) => {
+  const docRef = firestore.collection('productos').doc(id);
+  const doc = await docRef.get();
+  if (!doc.exists) return null;
   
-  const result = await pool.query(query, values);
-  return result.rows[0];
+  const data = doc.data();
+  await docRef.delete();
+  
+  // Opcional: Eliminar referencias en postgres comanda_detalles (aquí id es string)
+  await pool.query('DELETE FROM comanda_detalles WHERE producto_id = $1', [id]);
+  
+  return { id, ...data };
 };
 
-export const deleteProducto = async (id: number) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    await client.query('DELETE FROM comanda_detalles WHERE producto_id = $1', [id]);
-    const result = await client.query('DELETE FROM productos WHERE id = $1 RETURNING *', [id]);
-    await client.query('COMMIT');
-    return result.rows[0];
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
-  }
-};
-
-export const updateEstadoProducto = async (id: number, disponible: boolean) => {
-  const result = await pool.query('UPDATE productos SET disponible = $1 WHERE id = $2 RETURNING *', [disponible, id]);
-  return result.rows[0];
+export const updateEstadoProducto = async (id: string, disponible: boolean) => {
+  return await updateProducto(id, { disponible });
 };

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as ComandasRepository from './comandas.repository';
 import pool from '../../config/db';
+import { firestore } from '../../config/firebase';
 
 export const obtenerActivas = async (req: Request, res: Response) => {
   try {
@@ -87,18 +88,21 @@ export const crearComanda = async (req: Request, res: Response) => {
         res.status(400).json({ error: 'Formato de detalle inválido.' });
         return;
       }
-      // Obtener el precio base si el frontend no envió un precio unitario final
-      const prodQuery = await pool.query('SELECT precio FROM productos WHERE id = $1 AND disponible = true', [d.producto_id]);
-      if (prodQuery.rows.length === 0) {
+      // Obtener el precio base y nombre si el frontend no envió un precio unitario final
+      const prodRef = await firestore.collection('productos').doc(d.producto_id).get();
+      if (!prodRef.exists || !prodRef.data()?.disponible) {
         res.status(400).json({ error: `El producto con ID ${d.producto_id} no existe o no está disponible.` });
         return;
       }
+      
+      const prodData = prodRef.data();
       const precioUnitario = d.precio_unitario !== undefined && d.precio_unitario !== null
         ? Number(d.precio_unitario)
-        : Number(prodQuery.rows[0].precio);
+        : Number(prodData?.precio);
         
       detallesFormateados.push({
         producto_id: d.producto_id,
+        producto_nombre: prodData?.nombre || 'Producto',
         cantidad: d.cantidad,
         precio_unitario: precioUnitario,
         notas: d.notas,

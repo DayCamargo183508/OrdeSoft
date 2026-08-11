@@ -120,7 +120,7 @@ export const updateProducto = async (req: Request, res: Response) => {
       return;
     }
     const { id } = req.params;
-    const productoActualizado = await MenuRepository.updateProducto(Number(id), req.body);
+    const productoActualizado = await MenuRepository.updateProducto(id as string, req.body);
     
     if (!productoActualizado) {
       res.status(404).json({ error: 'Producto no encontrado o no hay campos para actualizar.' });
@@ -143,7 +143,7 @@ export const deleteProducto = async (req: Request, res: Response) => {
       return;
     }
     const { id } = req.params;
-    const producto = await MenuRepository.deleteProducto(Number(id));
+    const producto = await MenuRepository.deleteProducto(id as string);
     if (!producto) {
       res.status(404).json({ error: 'Producto no encontrado.' });
       return;
@@ -169,7 +169,7 @@ export const updateEstadoProducto = async (req: Request, res: Response) => {
       return;
     }
     
-    const productoActualizado = await MenuRepository.updateEstadoProducto(Number(id), Boolean(estado));
+    const productoActualizado = await MenuRepository.updateEstadoProducto(id as string, Boolean(estado));
     
     if (!productoActualizado) {
       res.status(404).json({ error: 'Producto no encontrado.' });

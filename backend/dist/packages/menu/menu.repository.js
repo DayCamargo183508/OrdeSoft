@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateEstadoProducto = exports.deleteProducto = exports.updateProducto = exports.createProducto = exports.getProductosByCategoria = exports.getProductos = exports.updateCategoria = exports.deleteCategoria = exports.createCategoria = exports.getCategorias = void 0;
 const db_1 = __importDefault(require("../../config/db"));
+const firebase_1 = require("../../config/firebase");
 // --- CATEGORIAS ---
 const getCategorias = async () => {
     const result = await db_1.default.query('SELECT * FROM categorias WHERE activa = true ORDER BY nombre ASC');
@@ -39,91 +40,80 @@ const updateCategoria = async (id, nombre) => {
     return result.rows[0];
 };
 exports.updateCategoria = updateCategoria;
-// --- PRODUCTOS ---
+// --- PRODUCTOS (Firebase Firestore) ---
 const getProductos = async (incluirInactivos = false) => {
-    let query = `
-    SELECT p.*, c.nombre as categoria_nombre 
-    FROM productos p 
-    LEFT JOIN categorias c ON p.categoria_id = c.id 
-  `;
+    // Obtenemos todas las categorías de Postgres para cruzar los nombres (Join manual)
+    const catResult = await db_1.default.query('SELECT id, nombre FROM categorias');
+    const categoriasMap = new Map();
+    catResult.rows.forEach((c) => categoriasMap.set(c.id, c.nombre));
+    let query = firebase_1.firestore.collection('productos');
     if (!incluirInactivos) {
-        query += ` WHERE p.disponible = true`;
+        query = query.where('disponible', '==', true);
     }
-    query += ` ORDER BY p.id ASC`;
-    const result = await db_1.default.query(query);
-    return result.rows;
+    const snapshot = await query.get();
+    const productos = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            categoria_nombre: categoriasMap.get(data.categoria_id) || 'Sin categoría'
+        };
+    });
+    return productos.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
 };
 exports.getProductos = getProductos;
 const getProductosByCategoria = async (categoria_id) => {
-    const query = `
-    SELECT p.*, c.nombre as categoria_nombre 
-    FROM productos p 
-    LEFT JOIN categorias c ON p.categoria_id = c.id 
-    WHERE p.categoria_id = $1 AND p.disponible = true
-    ORDER BY p.nombre ASC
-  `;
-    const result = await db_1.default.query(query, [categoria_id]);
-    return result.rows;
+    const catResult = await db_1.default.query('SELECT nombre FROM categorias WHERE id = $1', [categoria_id]);
+    const categoria_nombre = catResult.rows.length > 0 ? catResult.rows[0].nombre : 'Sin categoría';
+    const snapshot = await firebase_1.firestore.collection('productos')
+        .where('categoria_id', '==', categoria_id)
+        .where('disponible', '==', true)
+        .get();
+    return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        categoria_nombre
+    }));
 };
 exports.getProductosByCategoria = getProductosByCategoria;
 const createProducto = async (categoria_id, nombre, descripcion, precio) => {
-    const result = await db_1.default.query('INSERT INTO productos (categoria_id, nombre, descripcion, precio) VALUES ($1, $2, $3, $4) RETURNING *', [categoria_id, nombre, descripcion, precio]);
-    return result.rows[0];
+    const newRef = firebase_1.firestore.collection('productos').doc();
+    const data = {
+        categoria_id,
+        nombre,
+        descripcion,
+        precio,
+        disponible: true,
+        created_at: new Date().toISOString()
+    };
+    await newRef.set(data);
+    return { id: newRef.id, ...data };
 };
 exports.createProducto = createProducto;
 const updateProducto = async (id, data) => {
-    const updates = [];
-    const values = [];
-    let index = 1;
-    if (data.categoria_id !== undefined) {
-        updates.push(`categoria_id = $${index++}`);
-        values.push(data.categoria_id);
-    }
-    if (data.nombre !== undefined) {
-        updates.push(`nombre = $${index++}`);
-        values.push(data.nombre);
-    }
-    if (data.descripcion !== undefined) {
-        updates.push(`descripcion = $${index++}`);
-        values.push(data.descripcion);
-    }
-    if (data.precio !== undefined) {
-        updates.push(`precio = $${index++}`);
-        values.push(data.precio);
-    }
-    if (data.disponible !== undefined) {
-        updates.push(`disponible = $${index++}`);
-        values.push(data.disponible);
-    }
-    if (updates.length === 0)
+    const docRef = firebase_1.firestore.collection('productos').doc(id);
+    const doc = await docRef.get();
+    if (!doc.exists)
         return null;
-    values.push(id);
-    const query = `UPDATE productos SET ${updates.join(', ')} WHERE id = $${index} RETURNING *`;
-    const result = await db_1.default.query(query, values);
-    return result.rows[0];
+    await docRef.update(data);
+    const updated = await docRef.get();
+    return { id: updated.id, ...updated.data() };
 };
 exports.updateProducto = updateProducto;
 const deleteProducto = async (id) => {
-    const client = await db_1.default.connect();
-    try {
-        await client.query('BEGIN');
-        await client.query('DELETE FROM comanda_detalles WHERE producto_id = $1', [id]);
-        const result = await client.query('DELETE FROM productos WHERE id = $1 RETURNING *', [id]);
-        await client.query('COMMIT');
-        return result.rows[0];
-    }
-    catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-    }
-    finally {
-        client.release();
-    }
+    const docRef = firebase_1.firestore.collection('productos').doc(id);
+    const doc = await docRef.get();
+    if (!doc.exists)
+        return null;
+    const data = doc.data();
+    await docRef.delete();
+    // Opcional: Eliminar referencias en postgres comanda_detalles (aquí id es string)
+    await db_1.default.query('DELETE FROM comanda_detalles WHERE producto_id = $1', [id]);
+    return { id, ...data };
 };
 exports.deleteProducto = deleteProducto;
 const updateEstadoProducto = async (id, disponible) => {
-    const result = await db_1.default.query('UPDATE productos SET disponible = $1 WHERE id = $2 RETURNING *', [disponible, id]);
-    return result.rows[0];
+    return await (0, exports.updateProducto)(id, { disponible });
 };
 exports.updateEstadoProducto = updateEstadoProducto;
 //# sourceMappingURL=menu.repository.js.map

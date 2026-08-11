@@ -88,18 +88,6 @@ pool.query('SELECT NOW()', async (err, res) => {
       `);
             console.log('Tabla categorias verificada/creada exitosamente.');
             await pool.query(`
-        CREATE TABLE IF NOT EXISTS productos (
-          id SERIAL PRIMARY KEY,
-          categoria_id INT REFERENCES categorias(id) ON DELETE CASCADE,
-          nombre VARCHAR(100) NOT NULL,
-          descripcion TEXT,
-          precio DECIMAL(10, 2) NOT NULL,
-          disponible BOOLEAN DEFAULT TRUE,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-            console.log('Tabla productos verificada/creada exitosamente.');
-            await pool.query(`
         CREATE TABLE IF NOT EXISTS comandas (
           id SERIAL PRIMARY KEY,
           mesa_id INT REFERENCES mesas(id) ON DELETE RESTRICT,
@@ -116,7 +104,8 @@ pool.query('SELECT NOW()', async (err, res) => {
         CREATE TABLE IF NOT EXISTS comanda_detalles (
           id SERIAL PRIMARY KEY,
           comanda_id INT REFERENCES comandas(id) ON DELETE CASCADE,
-          producto_id INT REFERENCES productos(id) ON DELETE RESTRICT,
+          producto_id VARCHAR(255) NOT NULL,
+          producto_nombre VARCHAR(100) NOT NULL,
           cantidad INT NOT NULL CHECK (cantidad > 0),
           precio_unitario DECIMAL(10, 2) NOT NULL,
           subtotal DECIMAL(10, 2) NOT NULL
@@ -125,9 +114,6 @@ pool.query('SELECT NOW()', async (err, res) => {
             console.log('Tabla comanda_detalles verificada/creada exitosamente.');
             // Migraciones (Añadir columnas si no existen)
             try {
-                await pool.query("ALTER TABLE productos ADD COLUMN IF NOT EXISTS tipo VARCHAR(10) DEFAULT 'comida'");
-                await pool.query("ALTER TABLE productos ADD COLUMN IF NOT EXISTS controla_stock BOOLEAN DEFAULT FALSE");
-                await pool.query("ALTER TABLE productos ADD COLUMN IF NOT EXISTS stock_actual INT DEFAULT 0");
                 await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS notas VARCHAR(100) DEFAULT NULL");
                 await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS cuenta_id INT DEFAULT 1");
                 await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS cliente_nombre VARCHAR(100) DEFAULT 'Cliente 1'");

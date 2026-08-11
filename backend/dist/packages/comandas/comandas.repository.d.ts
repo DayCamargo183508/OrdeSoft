@@ -1,5 +1,6 @@
 export interface DetalleComandaInput {
-    producto_id: number;
+    producto_id: string;
+    producto_nombre?: string;
     cantidad: number;
     precio_unitario: number;
     notas?: string;

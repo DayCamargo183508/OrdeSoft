@@ -1,7 +1,8 @@
 import pool from '../../config/db';
 
 export interface DetalleComandaInput {
-  producto_id: number;
+  producto_id: string;
+  producto_nombre?: string;
   cantidad: number;
   precio_unitario: number;
   notas?: string;
@@ -28,8 +29,8 @@ export const crearComandaTransaccional = async (mesa_id: number | null, tipo_ord
       totalComanda += subtotal;
 
       await client.query(
-        'INSERT INTO comanda_detalles (comanda_id, producto_id, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-        [comandaId, detalle.producto_id, detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']
+        'INSERT INTO comanda_detalles (comanda_id, producto_id, producto_nombre, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        [comandaId, detalle.producto_id, detalle.producto_nombre || 'Producto', detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']
       );
     }
 
@@ -73,8 +74,8 @@ export const agregarDetallesComandaTransaccional = async (comanda_id: number, de
       totalAdicional += subtotal;
 
       await client.query(
-        'INSERT INTO comanda_detalles (comanda_id, producto_id, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-        [comanda_id, detalle.producto_id, detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']
+        'INSERT INTO comanda_detalles (comanda_id, producto_id, producto_nombre, cantidad, precio_unitario, subtotal, notas, cuenta_id, cliente_nombre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        [comanda_id, detalle.producto_id, detalle.producto_nombre || 'Producto', detalle.cantidad, detalle.precio_unitario, subtotal, detalle.notas || null, detalle.cuenta_id || 1, detalle.cliente_nombre || 'Cliente 1']
       );
     }
 
@@ -108,7 +109,7 @@ export const obtenerComandaPorId = async (id: number) => {
 
   // Detalles
   const detallesResult = await pool.query(
-    "SELECT d.*, p.nombre as producto_nombre FROM comanda_detalles d LEFT JOIN productos p ON d.producto_id = p.id WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
+    "SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
     [id]
   );
   
@@ -144,7 +145,7 @@ export const obtenerComandasParaLlevar = async () => {
 
   const comandas = await Promise.all(result.rows.map(async (c) => {
     const detallesResult = await pool.query(
-      "SELECT d.*, p.nombre as producto_nombre FROM comanda_detalles d LEFT JOIN productos p ON d.producto_id = p.id WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
+      "SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
       [c.id]
     );
     
@@ -204,10 +205,9 @@ export const obtenerTicketCocina = async (comanda_id: number) => {
   const cabecera = cabeceraQuery.rows[0];
 
   const detallesQuery = await pool.query(
-    `SELECT d.cantidad, p.nombre as producto, d.notas 
+    `SELECT d.cantidad, d.producto_nombre as producto, d.notas 
      FROM comanda_detalles d 
-     JOIN productos p ON d.producto_id = p.id 
-     WHERE d.comanda_id = $1 AND p.tipo = 'comida'`,
+     WHERE d.comanda_id = $1`,
     [comanda_id]
   );
 
