@@ -41,6 +41,7 @@ const getMesas = async (req, res) => {
         res.json(mesas);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error obteniendo mesas:', error);
         res.status(500).json({ message: error.message || 'Error al obtener las mesas' });
     }
@@ -57,6 +58,7 @@ const createMesa = async (req, res) => {
         res.status(201).json(nuevaMesa);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('[ERROR] createMesa:', error);
         res.status(500).json({ message: error.message || 'Error interno al crear mesa' });
     }
@@ -79,6 +81,7 @@ const updateEstado = async (req, res) => {
         res.json(mesaActualizada);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error actualizando estado de mesa:', error);
         res.status(500).json({ message: error.message || 'Error al actualizar estado de la mesa' });
     }
@@ -98,6 +101,7 @@ const deleteMesa = async (req, res) => {
         res.json({ message: 'Mesa eliminada con éxito', mesa: mesaEliminada });
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('[ERROR] deleteMesa:', error);
         // Return 400 if it's the known validation error from the repo, otherwise 500
         if (error.message.includes("mínimo permitido") || error.message.includes("pedido activo")) {
@@ -124,6 +128,7 @@ const juntarMesas = async (req, res) => {
         res.status(200).json({ message: 'Mesas juntadas con éxito', mesa: mesaActualizada });
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error juntando mesas:', error);
         res.status(500).json({ message: error.message || 'Error al juntar las mesas' });
     }
@@ -144,6 +149,7 @@ const separarMesa = async (req, res) => {
         res.status(200).json({ message: 'Mesa separada con éxito', mesa: mesaActualizada });
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error separando mesa:', error);
         res.status(500).json({ message: error.message || 'Error al separar la mesa' });
     }

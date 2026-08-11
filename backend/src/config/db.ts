@@ -6,23 +6,19 @@ dotenv.config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  },
-  // Opciones de optimización para un servidor local rápido
-  max: 20, // Máximo de clientes en el pool
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+  max: 10, // Reducido a 10 para balancear conexiones serverless
   idleTimeoutMillis: 30000, // Cerrar conexiones inactivas tras 30s
-  connectionTimeoutMillis: 2000, // Límite de 2s para conectar antes de lanzar error
+  connectionTimeoutMillis: 15000, // Dar 15 segundos a Neon para despertar antes de arrojar Timeout
 });
 
-// Probar conexión al iniciar el servidor
-pool.query('SELECT NOW()', async (err, res) => {
-  if (err) {
-    console.error('Error al conectar a PostgreSQL:', err.stack);
-  } else {
-    console.log(`Base de datos OrdeSoft conectada exitosamente en el puerto ${process.env.DB_PORT}`);
-    
+// Probar conexión al iniciar el servidor con reintentos para Neon (Wake Up)
+const initDatabase = async () => {
+  let retries = 3;
+  while (retries > 0) {
     try {
+      await pool.query('SELECT NOW()');
+      console.log(`Base de datos OrdeSoft conectada exitosamente en el puerto ${process.env.DB_PORT || 'por defecto'}`);
       // Crear tabla usuarios (meseros)
       await pool.query(`
         CREATE TABLE IF NOT EXISTS usuarios (
@@ -135,10 +131,22 @@ pool.query('SELECT NOW()', async (err, res) => {
       } catch (migErr) {
         console.error('Error aplicando migraciones:', migErr);
       }
-    } catch (tableErr) {
-      console.error('Error al verificar/crear las tablas:', tableErr);
+    // Si llegamos hasta aquí, todo cargó bien. Salimos del bucle.
+    break;
+
+  } catch (err: any) {
+    console.error(`[DATABASE ERROR] Fallo al conectar o inicializar PostgreSQL:`, err.message);
+    retries--;
+    if (retries === 0) {
+      console.error('❌ Error definitivo al conectar a PostgreSQL tras 3 intentos. Revisa tu DATABASE_URL o el estado del servidor.');
+    } else {
+      console.log(`⏳ Reintentando conexión a PostgreSQL en 3 segundos... (Quedan ${retries} intentos)`);
+      await new Promise(res => setTimeout(res, 3000)); // Esperar 3 segundos antes de intentar de nuevo
+    }
     }
   }
-});
+};
+
+initDatabase();
 
 export default pool;

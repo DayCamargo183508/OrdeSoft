@@ -42,6 +42,7 @@ const getCategorias = async (req, res) => {
         res.json(categorias);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error obteniendo categorias:', error);
         res.status(500).json({ message: error.message || 'Error al obtener categorias' });
     }
@@ -62,6 +63,7 @@ const createCategoria = async (req, res) => {
         res.status(201).json(nuevaCategoria);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error creando categoria:', error);
         if (error.code === '23505') {
             res.status(400).json({ error: 'La categoría ya existe.' });
@@ -86,6 +88,7 @@ const deleteCategoria = async (req, res) => {
         res.json({ message: 'Categoría y sus productos deshabilitados con éxito', categoria });
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error eliminando categoria:', error);
         res.status(500).json({ message: error.message || 'Error al eliminar categoria' });
     }
@@ -111,6 +114,7 @@ const updateCategoria = async (req, res) => {
         res.json(categoria);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error actualizando categoria:', error);
         if (error.code === '23505') {
             res.status(400).json({ error: 'La categoría ya existe.' });
@@ -128,6 +132,7 @@ const getProductos = async (req, res) => {
         res.json(productos);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error obteniendo productos:', error);
         res.status(500).json({ message: error.message || 'Error al obtener productos' });
     }
@@ -148,6 +153,7 @@ const createProducto = async (req, res) => {
         res.status(201).json(nuevoProducto);
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error creando producto:', error);
         res.status(500).json({ message: error.message || 'Error al crear producto' });
     }
@@ -171,6 +177,7 @@ const updateProducto = async (req, res) => {
         });
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error actualizando producto:', error);
         res.status(500).json({ message: error.message || 'Error al actualizar producto' });
     }
@@ -191,6 +198,7 @@ const deleteProducto = async (req, res) => {
         res.status(200).json({ message: 'Producto e historial eliminados correctamente' });
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error eliminando producto:', error);
         res.status(500).json({ message: error.message || 'Error al eliminar producto' });
     }
@@ -216,6 +224,7 @@ const updateEstadoProducto = async (req, res) => {
         res.json({ message: 'Estado del producto actualizado con éxito', producto: productoActualizado });
     }
     catch (error) {
+        console.error('[DATABASE ERROR]:', error);
         console.error('Error actualizando estado del producto:', error);
         res.status(500).json({ message: error.message || 'Error al actualizar estado del producto' });
     }
