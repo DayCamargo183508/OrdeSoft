@@ -50,6 +50,19 @@ class ApiClient {
           }
           return handler.next(options);
         },
+        onError: (DioException e, handler) {
+          // Extraer mensaje del backend si existe
+          if (e.response?.data != null && e.response?.data is Map) {
+            final data = e.response!.data as Map<String, dynamic>;
+            final backendMessage = data['message'] ?? data['error'];
+            
+            if (backendMessage != null && backendMessage is String) {
+              // Mutar el mensaje de la excepción para que sea el del backend
+              e = e.copyWith(message: backendMessage);
+            }
+          }
+          return handler.next(e);
+        },
       ),
     );
   }

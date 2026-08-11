@@ -6,6 +6,7 @@ export const getMesas = async (req: Request, res: Response) => {
     const mesas = await MesasRepository.getMesas();
     res.json(mesas);
   } catch (error) {
+    console.error('[DATABASE ERROR]:', error);
     console.error('Error obteniendo mesas:', error);
     res.status(500).json({ message: (error as Error).message || 'Error al obtener las mesas' });
   }
@@ -21,6 +22,7 @@ export const createMesa = async (req: Request, res: Response) => {
     const nuevaMesa = await MesasRepository.createMesa(capacidad || 4);
     res.status(201).json(nuevaMesa);
   } catch (error: any) {
+    console.error('[DATABASE ERROR]:', error);
     console.error('[ERROR] createMesa:', error);
     res.status(500).json({ message: error.message || 'Error interno al crear mesa' });
   }
@@ -44,6 +46,7 @@ export const updateEstado = async (req: Request, res: Response) => {
     }
     res.json(mesaActualizada);
   } catch (error) {
+    console.error('[DATABASE ERROR]:', error);
     console.error('Error actualizando estado de mesa:', error);
     res.status(500).json({ message: (error as Error).message || 'Error al actualizar estado de la mesa' });
   }
@@ -63,6 +66,7 @@ export const deleteMesa = async (req: Request, res: Response) => {
     }
     res.json({ message: 'Mesa eliminada con éxito', mesa: mesaEliminada });
   } catch (error: any) {
+    console.error('[DATABASE ERROR]:', error);
     console.error('[ERROR] deleteMesa:', error);
     // Return 400 if it's the known validation error from the repo, otherwise 500
     if (error.message.includes("mínimo permitido") || error.message.includes("pedido activo")) {
@@ -87,6 +91,7 @@ export const juntarMesas = async (req: Request, res: Response) => {
     }
     res.status(200).json({ message: 'Mesas juntadas con éxito', mesa: mesaActualizada });
   } catch (error) {
+    console.error('[DATABASE ERROR]:', error);
     console.error('Error juntando mesas:', error);
     res.status(500).json({ message: (error as Error).message || 'Error al juntar las mesas' });
   }
@@ -106,6 +111,7 @@ export const separarMesa = async (req: Request, res: Response) => {
     }
     res.status(200).json({ message: 'Mesa separada con éxito', mesa: mesaActualizada });
   } catch (error) {
+    console.error('[DATABASE ERROR]:', error);
     console.error('Error separando mesa:', error);
     res.status(500).json({ message: (error as Error).message || 'Error al separar la mesa' });
   }
