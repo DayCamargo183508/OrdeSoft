@@ -246,7 +246,7 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final nombre = controller.text.trim();
               if (nombre.isEmpty) return;
               Navigator.pop(ctx);
