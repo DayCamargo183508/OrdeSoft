@@ -27,22 +27,42 @@ class ItemComanda {
 
   double get total => cantidad * precioUnitarioFinal;
 
-  String get notasString => notas.map((n) => n.texto).join(', ');
+  String get notasString {
+    return notas.map((n) {
+      if (n.precioExtra > 0) {
+        return '${n.texto} [+\$${n.precioExtra.toStringAsFixed(2)}]';
+      }
+      return n.texto;
+    }).join(', ');
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'productoId': productoId,
         'producto': producto,
         'cantidad': cantidad,
-        'precioUnitario': precioUnitarioFinal,
+        'precioUnitario': precioUnitario,
         'notas': notasString,
       };
 
   factory ItemComanda.fromJson(Map<String, dynamic> json) {
     final notasStr = json['notas'] as String? ?? '';
-    final listNotas = notasStr.isEmpty 
-        ? <NotaAplicada>[] 
-        : notasStr.split(',').map((e) => NotaAplicada(e.trim(), 0.0)).toList();
+    final listNotas = <NotaAplicada>[];
+    
+    if (notasStr.isNotEmpty) {
+      final parts = notasStr.split(', ');
+      for (var part in parts) {
+        double extra = 0.0;
+        String text = part.trim();
+        
+        final match = RegExp(r'\[\+\$(\d+\.?\d*)\]').firstMatch(text);
+        if (match != null) {
+          extra = double.tryParse(match.group(1)!) ?? 0.0;
+          text = text.replaceAll(match.group(0)!, '').trim();
+        }
+        listNotas.add(NotaAplicada(text, extra));
+      }
+    }
     
     return ItemComanda(
       id: json['id'] as String? ?? '',

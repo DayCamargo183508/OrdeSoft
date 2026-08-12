@@ -403,7 +403,15 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
     } else if (estaUnida) {
       colorA = AppColors.mesaUnida;
       colorB = const Color(0xFF6C3483);
-      textoEstado = 'Grupo M${mesa.numeroPadre ?? mesa.numero}';
+      
+      final double totalIndiv = _totalesMesasOcupadas[mesa.id] ?? 0.0;
+      final int grupoId = mesa.mesaPadreId ?? mesa.id;
+      final double totalGrupo = _mesas.where((m) => m.id == grupoId || m.mesaPadreId == grupoId).fold(0.0, (sum, m) => sum + (_totalesMesasOcupadas[m.id] ?? 0.0));
+      
+      textoEstado = 'G-M${mesa.numeroPadre ?? mesa.numero}';
+      if (totalIndiv > 0) textoEstado += '\n\$${totalIndiv.toStringAsFixed(2)}';
+      if (totalGrupo > totalIndiv) textoEstado += '\n(Tot: \$${totalGrupo.toStringAsFixed(2)})';
+      
       iconoEstado = Icons.link;
     } else if (estaLibre) {
       colorA = AppColors.mesaLibre;
@@ -470,7 +478,7 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
                   constraints: const BoxConstraints(),
                 ),
               ),
-            if (!estaLibre && !estaUnida && !estaSeleccionada)
+            if (!estaLibre && !estaSeleccionada)
               Positioned(
                 bottom: 8, right: 8,
                 child: GestureDetector(
@@ -539,11 +547,6 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
         icon: Icons.shopping_bag_outlined,
         title: 'Sin pedidos para llevar',
         subtitle: 'Los pedidos para llevar activos aparecen aqui.',
-        action: ElevatedButton.icon(
-          onPressed: _irParaLlevar,
-          icon: const Icon(Icons.add),
-          label: const Text('Crear pedido'),
-        ),
       );
     }
     return ListView.builder(

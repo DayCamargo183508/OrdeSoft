@@ -39,7 +39,9 @@ class _AdminScreenState extends State<AdminScreen> {
 
   // Estados de UI
   final TextEditingController _buscarComandaCtrl = TextEditingController();
+  final TextEditingController _buscarMenuCtrl = TextEditingController();
   String _filtroComanda = '';
+  String _filtroMenu = '';
   Map<int, bool> _mostrarPin = {};
   int? _categoriaSeleccionadaId;
 
@@ -781,9 +783,14 @@ class _AdminScreenState extends State<AdminScreen> {
 
   // --- MENU Y CATÁLOGO ---
   Widget _buildMenuTab() {
-    final prodsFiltrados = _categoriaSeleccionadaId == null 
+    var prodsFiltrados = _categoriaSeleccionadaId == null 
         ? _productos 
         : _productos.where((p) => p.categoriaId == _categoriaSeleccionadaId).toList();
+        
+    if (_filtroMenu.isNotEmpty) {
+      final query = _filtroMenu.toLowerCase();
+      prodsFiltrados = prodsFiltrados.where((p) => p.nombre.toLowerCase().contains(query)).toList();
+    }
 
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -794,6 +801,30 @@ class _AdminScreenState extends State<AdminScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Menú y Catálogo', style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextField(
+                    controller: _buscarMenuCtrl,
+                    onChanged: (val) => setState(() => _filtroMenu = val),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar producto...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _filtroMenu.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _buscarMenuCtrl.clear();
+                                setState(() => _filtroMenu = '');
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                  ),
+                ),
+              ),
               Row(
                 children: [
                   ElevatedButton.icon(

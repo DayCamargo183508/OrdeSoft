@@ -563,7 +563,7 @@ class _TomarComandaScreenState extends State<TomarComandaScreen> {
               child: Row(children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(item.producto, style: AppTextStyles.labelLarge),
-                  Text('\$${item.precioUnitarioFinal.toStringAsFixed(2)} x ${item.cantidad} = \$${item.total.toStringAsFixed(2)}',
+                  Text('\$${item.precioUnitario.toStringAsFixed(2)} x ${item.cantidad} = \$${item.total.toStringAsFixed(2)}',
                     style: AppTextStyles.priceSmall),
                   if (item.notas.isNotEmpty)
                     ...item.notas.map((n) => Text(
