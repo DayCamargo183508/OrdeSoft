@@ -185,7 +185,7 @@ export const updateEstadoProducto = async (req: Request, res: Response) => {
     res.json({ message: 'Estado del producto actualizado con éxito', producto: productoActualizado });
   } catch (error) {
     console.error('[DATABASE ERROR]:', error);
-    console.error('Error actualizando estado del producto:', error);
+    console.error('[UPDATE DISPONIBILIDAD ERROR]:', error);
     res.status(500).json({ message: (error as Error).message || 'Error al actualizar estado del producto' });
   }
 };

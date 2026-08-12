@@ -27,7 +27,7 @@ class CategoriaAdmin {
 }
 
 class ProductoAdmin {
-  final int id;
+  final String id;
   final String nombre;
   final double precio;
   final int categoriaId;
@@ -46,7 +46,7 @@ class ProductoAdmin {
   });
 
   factory ProductoAdmin.fromJson(Map<String, dynamic> json) => ProductoAdmin(
-        id: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+        id: json['id']?.toString() ?? '',
         nombre: json['nombre']?.toString() ?? '',
         precio: double.tryParse(json['precio']?.toString() ?? '0') ?? 0.0,
         categoriaId: int.tryParse(json['categoria_id']?.toString() ?? json['categoriaId']?.toString() ?? '0') ?? 0,

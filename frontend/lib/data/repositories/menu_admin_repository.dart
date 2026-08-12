@@ -75,7 +75,7 @@ class MenuAdminRepository {
     }
   }
 
-  Future<bool> actualizarProducto(int id, String nombre, double precio, int categoriaId) async {
+  Future<bool> actualizarProducto(String id, String nombre, double precio, int categoriaId) async {
     final url = '/menu/productos/$id';
     print('>>> ENVIANDO PATCH A URL: ${_apiClient.dio.options.baseUrl}$url');
 
@@ -95,16 +95,14 @@ class MenuAdminRepository {
         return true;
       }
       return false;
-    } on DioException catch (e) {
-      print('>>> ERROR DIO PATCH PRODUCTO: ${e.response?.statusCode} - ${e.response?.data}');
-      return false;
     } catch (e) {
       print('>>> ERROR EN PATCH PRODUCTO: $e');
+      _handleError(e, 'Error al actualizar producto');
       return false;
     }
   }
 
-  Future<bool> actualizarDisponibilidadProducto(int id, bool disponible) async {
+  Future<bool> actualizarDisponibilidadProducto(String id, bool disponible) async {
     final url = '/menu/productos/$id/estado';
     try {
       final response = await _apiClient.dio.patch(
@@ -116,11 +114,12 @@ class MenuAdminRepository {
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       print('>>> ERROR EN PATCH ESTADO PRODUCTO: $e');
+      _handleError(e, 'Error al actualizar disponibilidad');
       return false;
     }
   }
 
-  Future<void> eliminarProducto(int id) async {
+  Future<void> eliminarProducto(String id) async {
     try {
       await _apiClient.dio.delete('/menu/productos/$id');
     } catch (e) {

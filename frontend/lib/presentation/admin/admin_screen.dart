@@ -1097,7 +1097,7 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  void _eliminarProducto(int id) {
+  void _eliminarProducto(String id) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
