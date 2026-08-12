@@ -107,9 +107,8 @@ export const obtenerComandaPorId = async (id: number) => {
   if (comandaResult.rows.length === 0) return null;
   const comanda = comandaResult.rows[0];
 
-  // Detalles
   const detallesResult = await pool.query(
-    "SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
+    "SELECT d.id, d.comanda_id, d.producto_id, COALESCE(d.producto_nombre, 'Producto') AS producto_nombre, d.cantidad, d.precio_unitario, d.subtotal, d.notas, d.cuenta_id, d.cliente_nombre, d.estado_pago FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
     [id]
   );
   
@@ -145,7 +144,7 @@ export const obtenerComandasParaLlevar = async () => {
 
   const comandas = await Promise.all(result.rows.map(async (c) => {
     const detallesResult = await pool.query(
-      "SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
+      "SELECT d.id, d.comanda_id, d.producto_id, COALESCE(d.producto_nombre, 'Producto') AS producto_nombre, d.cantidad, d.precio_unitario, d.subtotal, d.notas, d.cuenta_id, d.cliente_nombre, d.estado_pago FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'",
       [c.id]
     );
     
@@ -205,7 +204,7 @@ export const obtenerTicketCocina = async (comanda_id: number) => {
   const cabecera = cabeceraQuery.rows[0];
 
   const detallesQuery = await pool.query(
-    `SELECT d.cantidad, d.producto_nombre as producto, d.notas 
+    `SELECT d.cantidad, COALESCE(d.producto_nombre, 'Producto') as producto, d.notas 
      FROM comanda_detalles d 
      WHERE d.comanda_id = $1`,
     [comanda_id]

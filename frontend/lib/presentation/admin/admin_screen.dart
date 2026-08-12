@@ -13,6 +13,7 @@ import '../../core/services/kitchen_ticket_service.dart';
 import '../../data/models/comanda_model.dart';
 import '../widgets/ticket_preview_dialog.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_animations.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -375,7 +376,18 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: ListView.builder(
+            child: _meseros.isEmpty
+                ? EmptyStateWidget(
+                    icon: Icons.group_off,
+                    title: 'No hay meseros registrados',
+                    subtitle: 'Crea tu primer mesero para que puedan acceder al sistema.',
+                    action: ElevatedButton.icon(
+                      onPressed: _mostrarDialogoCrearMesero,
+                      icon: const Icon(Icons.person_add),
+                      label: const Text('Nuevo Mesero'),
+                    ),
+                  )
+                : ListView.builder(
               itemCount: _meseros.length,
               itemBuilder: (context, index) {
                 final m = _meseros[index];
@@ -862,7 +874,18 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: GridView.builder(
+            child: prodsFiltrados.isEmpty
+                ? EmptyStateWidget(
+                    icon: Icons.fastfood_outlined,
+                    title: 'No hay productos',
+                    subtitle: 'Aún no hay productos registrados en esta categoría.',
+                    action: ElevatedButton.icon(
+                      onPressed: () => _mostrarDialogoProducto(null),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Nuevo Producto'),
+                    ),
+                  )
+                : GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, 
                 childAspectRatio: 3,

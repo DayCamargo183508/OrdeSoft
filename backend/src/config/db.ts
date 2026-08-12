@@ -128,6 +128,9 @@ const initDatabase = async () => {
 
       // Migraciones (Añadir columnas si no existen)
       try {
+        await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS producto_nombre VARCHAR(255)");
+        await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS precio_unitario NUMERIC(10,2) DEFAULT 0");
+        await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS subtotal NUMERIC(10,2) DEFAULT 0");
         await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS notas VARCHAR(100) DEFAULT NULL");
         await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS cuenta_id INT DEFAULT 1");
         await pool.query("ALTER TABLE comanda_detalles ADD COLUMN IF NOT EXISTS cliente_nombre VARCHAR(100) DEFAULT 'Cliente 1'");

@@ -1,6 +1,7 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter/services.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../core/theme/app_theme.dart';
 import '../admin/admin_screen.dart';
@@ -21,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   late Animation<double> _fadeAnimation;
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -32,13 +34,39 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
     _fadeController.forward();
     _slideController.forward();
+    _focusNode.requestFocus();
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
     _slideController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onKeyEvent(RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.backspace) {
+        _onKeyPress('DEL');
+      } else if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+        if (_pin.length == 4 && !_isLoading) _login();
+      } else {
+        String? digit;
+        if (event.logicalKey == LogicalKeyboardKey.numpad0 || event.logicalKey == LogicalKeyboardKey.digit0) digit = '0';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad1 || event.logicalKey == LogicalKeyboardKey.digit1) digit = '1';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad2 || event.logicalKey == LogicalKeyboardKey.digit2) digit = '2';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad3 || event.logicalKey == LogicalKeyboardKey.digit3) digit = '3';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad4 || event.logicalKey == LogicalKeyboardKey.digit4) digit = '4';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad5 || event.logicalKey == LogicalKeyboardKey.digit5) digit = '5';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad6 || event.logicalKey == LogicalKeyboardKey.digit6) digit = '6';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad7 || event.logicalKey == LogicalKeyboardKey.digit7) digit = '7';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad8 || event.logicalKey == LogicalKeyboardKey.digit8) digit = '8';
+        else if (event.logicalKey == LogicalKeyboardKey.numpad9 || event.logicalKey == LogicalKeyboardKey.digit9) digit = '9';
+        
+        if (digit != null) _onKeyPress(digit);
+      }
+    }
   }
 
   void _onKeyPress(String value) {
@@ -132,8 +160,12 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      body: Stack(
-        children: [
+      body: RawKeyboardListener(
+        focusNode: _focusNode,
+        onKey: _onKeyEvent,
+        autofocus: true,
+        child: Stack(
+          children: [
           Container(
             width: size.width, height: size.height,
             decoration: const BoxDecoration(
@@ -210,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

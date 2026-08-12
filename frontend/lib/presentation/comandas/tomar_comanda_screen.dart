@@ -620,13 +620,13 @@ class _TomarComandaScreenState extends State<TomarComandaScreen> {
                   await _comandasRepository.crearComanda(_comanda);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Comanda enviada a cocina.'), backgroundColor: AppColors.success));
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                    Navigator.pop(context, true);
                   }
                 } catch (e) {
                   await _colaImpresionService.encolarComanda(_comanda);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sin conexion. Comanda guardada localmente.'), backgroundColor: AppColors.warning));
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                    Navigator.pop(context, true);
                   }
                 } finally {
                   if (mounted) setState(() => _isEnviando = false);

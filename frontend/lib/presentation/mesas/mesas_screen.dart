@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/mesa_model.dart';
@@ -136,13 +136,16 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
         if (mounted) Navigator.pop(context);
       }
       if (mounted) {
-        Navigator.push(context, FadeSlidePageRoute(
+        final result = await Navigator.push(context, FadeSlidePageRoute(
           page: TomarComandaScreen(
             mesaId: mesa.id,
             mesaNumero: mesa.numero.toString(),
             comandaPreexistente: comandaExistente,
           ),
         ));
+        if (result == true && mounted) {
+          _cargarMesas();
+        }
       }
     }
   }
@@ -247,7 +250,7 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
               final nombre = controller.text.trim();
               if (nombre.isEmpty) return;
               Navigator.pop(ctx);
-              Navigator.push(context, FadeSlidePageRoute(
+              final result = await Navigator.push(context, FadeSlidePageRoute(
                 page: TomarComandaScreen(
                   mesaId: 0,
                   mesaNumero: 'Para Llevar',
@@ -255,6 +258,7 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
                   tipoOrden: 'PARA_LLEVAR',
                 ),
               ));
+              if (result == true && mounted) _cargarMesas();
             },
             child: const Text('Crear Orden'),
           ),
@@ -585,9 +589,12 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       OutlinedButton.icon(
-                        onPressed: () => Navigator.push(context, FadeSlidePageRoute(
-                          page: TomarComandaScreen(mesaId: 0, mesaNumero: 'Para Llevar', comandaPreexistente: comanda),
-                        )),
+                        onPressed: () async {
+                          final result = await Navigator.push(context, FadeSlidePageRoute(
+                            page: TomarComandaScreen(mesaId: 0, mesaNumero: 'Para Llevar', comandaPreexistente: comanda),
+                          ));
+                          if (result == true && mounted) _cargarMesas();
+                        },
                         icon: const Icon(Icons.add, size: 16),
                         label: const Text('Agregar'),
                         style: OutlinedButton.styleFrom(
