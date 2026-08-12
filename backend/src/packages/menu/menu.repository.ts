@@ -45,7 +45,7 @@ export const getProductos = async (incluirInactivos: boolean = false) => {
   // Obtenemos todas las categorías de Postgres para cruzar los nombres (Join manual)
   const catResult = await pool.query('SELECT id, nombre FROM categorias');
   const categoriasMap = new Map();
-  catResult.rows.forEach((c: any) => categoriasMap.set(c.id, c.nombre));
+  catResult.rows.forEach((c: any) => categoriasMap.set(String(c.id), c.nombre));
 
   if (!firestore) throw new Error('Firestore no está inicializado. Verifica firebase-key.json');
 
@@ -60,7 +60,7 @@ export const getProductos = async (incluirInactivos: boolean = false) => {
     return {
       id: doc.id,
       ...data,
-      categoria_nombre: categoriasMap.get(data.categoria_id) || 'Sin categoría'
+      categoria_nombre: categoriasMap.get(String(data.categoria_id)) || data.categoria || 'Sin categoría'
     };
   });
   

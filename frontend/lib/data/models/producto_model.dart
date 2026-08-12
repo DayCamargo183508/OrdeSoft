@@ -4,6 +4,7 @@ class Producto {
   final double precio;
   final bool disponible;
   final String categoriaId;
+  final String categoria;
   final String? imagenUrl;
 
   Producto({
@@ -12,6 +13,7 @@ class Producto {
     required this.precio,
     required this.disponible,
     required this.categoriaId,
+    required this.categoria,
     this.imagenUrl,
   });
 
@@ -29,6 +31,7 @@ class Producto {
       precio: _parseDouble(json['precio']),
       disponible: json['disponible'] as bool? ?? true,
       categoriaId: json['categoriaId']?.toString() ?? json['categoria_id']?.toString() ?? json['categoria']?.toString() ?? '',
+      categoria: json['categoria_nombre']?.toString() ?? json['categoria']?.toString() ?? 'Sin categoría',
       imagenUrl: json['imagenUrl']?.toString(),
     );
   }

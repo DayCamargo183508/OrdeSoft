@@ -1017,7 +1017,11 @@ class _AdminScreenState extends State<AdminScreen> {
   void _mostrarDialogoProducto(ProductoAdmin? p) {
     final nombreCtrl = TextEditingController(text: p?.nombre ?? '');
     final precioCtrl = TextEditingController(text: p != null ? p.precio.toString() : '');
-    int? catId = p?.categoriaId ?? (_categorias.isNotEmpty ? _categorias.first.id : null);
+    int? catId = p?.categoriaId;
+    if (catId != null && !_categorias.any((c) => c.id == catId)) {
+      catId = null;
+    }
+    catId ??= _categorias.isNotEmpty ? _categorias.first.id : null;
 
     showDialog(
       context: context,

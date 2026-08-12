@@ -50,7 +50,7 @@ class ProductoAdmin {
         nombre: json['nombre']?.toString() ?? '',
         precio: double.tryParse(json['precio']?.toString() ?? '0') ?? 0.0,
         categoriaId: int.tryParse(json['categoria_id']?.toString() ?? json['categoriaId']?.toString() ?? '0') ?? 0,
-        categoriaNombre: json['categoria_nombre']?.toString(),
+        categoriaNombre: json['categoria_nombre']?.toString() ?? json['categoria']?.toString(),
         disponible: json['disponible'] == true || json['disponible'] == 'true' || json['disponible'] == 1,
         descripcion: json['descripcion']?.toString(),
       );
