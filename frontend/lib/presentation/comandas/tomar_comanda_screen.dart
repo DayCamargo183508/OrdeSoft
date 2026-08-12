@@ -623,10 +623,18 @@ class _TomarComandaScreenState extends State<TomarComandaScreen> {
                     Navigator.pop(context, true);
                   }
                 } catch (e) {
-                  await _colaImpresionService.encolarComanda(_comanda);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sin conexion. Comanda guardada localmente.'), backgroundColor: AppColors.warning));
-                    Navigator.pop(context, true);
+                  final errorMsg = e.toString();
+                  if (errorMsg.contains('CONNECTION_ERROR')) {
+                    await _colaImpresionService.encolarComanda(_comanda);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sin conexion. Comanda guardada localmente.'), backgroundColor: AppColors.warning));
+                      Navigator.pop(context, true);
+                    }
+                  } else {
+                    if (mounted) {
+                      final cleanError = errorMsg.replaceAll('Exception: SERVER_ERROR:', '').trim();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(cleanError), backgroundColor: AppColors.error));
+                    }
                   }
                 } finally {
                   if (mounted) setState(() => _isEnviando = false);

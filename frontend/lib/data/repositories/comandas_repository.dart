@@ -45,11 +45,17 @@ class ComandasRepository {
       await _apiClient.dio.post('/comandas', data: payload);
     } catch (e) {
       if (e is DioException) {
+        if (e.type == DioExceptionType.connectionError || 
+            e.type == DioExceptionType.connectionTimeout || 
+            e.type == DioExceptionType.receiveTimeout || 
+            e.type == DioExceptionType.sendTimeout) {
+            throw Exception('CONNECTION_ERROR');
+        }
         print('❌ ERROR AL GUARDAR COMANDA: Status ${e.response?.statusCode} - ${e.response?.data}');
         final errorMessage = e.response?.data?['message'] ?? e.response?.data?['error'] ?? 'Error interno al crear comanda.';
-        throw Exception(errorMessage);
+        throw Exception('SERVER_ERROR: $errorMessage');
       }
-      throw Exception('Error de red al crear la comanda: $e');
+      throw Exception('CONNECTION_ERROR: $e');
     }
   }
 

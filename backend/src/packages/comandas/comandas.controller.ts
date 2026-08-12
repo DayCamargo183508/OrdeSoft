@@ -135,7 +135,7 @@ export const crearComanda = async (req: Request, res: Response) => {
       res.status(201).json({ message: 'Comanda creada con éxito', comanda: nuevaComanda });
     }
   } catch (error) {
-    console.error('Error creando comanda:', error);
+    console.error('[CREAR COMANDA ERROR]:', error);
     res.status(500).json({ message: (error as Error).message || 'Error interno al crear comanda.' });
   }
 };
