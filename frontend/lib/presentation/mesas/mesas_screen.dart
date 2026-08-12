@@ -460,7 +460,7 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
                   Text(
                     textoEstado,
                     textAlign: TextAlign.center,
-                    maxLines: 2,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.mesaEstado,
                   ),
@@ -484,11 +484,53 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
                 child: GestureDetector(
                   onTap: () async {
                     showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
-                    final comanda = await _comandasRepository.obtenerComandaActivaPorMesa(mesa.id);
+                    
+                    ComandaMesa? comandaResult;
+                    
+                    if (estaUnida) {
+                      final int grupoId = mesa.mesaPadreId ?? mesa.id;
+                      final mesasDelGrupo = _mesas.where((m) => m.id == grupoId || m.mesaPadreId == grupoId).toList();
+                      
+                      List<String> idsBackend = [];
+                      List<ClienteSubCuenta> clientesMerged = [];
+                      double totalApiMerged = 0.0;
+                      int itemsApiCountMerged = 0;
+                      
+                      for (var m in mesasDelGrupo) {
+                        final c = await _comandasRepository.obtenerComandaActivaPorMesa(m.id);
+                        if (c != null) {
+                          if (c.idBackend != null) idsBackend.add(c.idBackend!);
+                          
+                          // Prefix client names with table number to distinguish them
+                          for (var cli in c.clientes) {
+                            if (cli.items.isNotEmpty) {
+                              cli.nombre = 'M${m.numero} - ${cli.nombre}';
+                              clientesMerged.add(cli);
+                            }
+                          }
+                          totalApiMerged += c.totalApi;
+                          itemsApiCountMerged += c.itemsApiCount;
+                        }
+                      }
+                      
+                      if (idsBackend.isNotEmpty) {
+                        comandaResult = ComandaMesa(
+                          mesaId: grupoId,
+                          idBackend: idsBackend.first,
+                          idsBackendGrupo: idsBackend,
+                          clientes: clientesMerged,
+                          totalApi: totalApiMerged,
+                          itemsApiCount: itemsApiCountMerged,
+                        );
+                      }
+                    } else {
+                      comandaResult = await _comandasRepository.obtenerComandaActivaPorMesa(mesa.id);
+                    }
+
                     if (mounted) {
                       Navigator.pop(context);
-                      if (comanda != null) {
-                        Navigator.push(context, FadeSlidePageRoute(page: CobrarComandaScreen(comanda: comanda)));
+                      if (comandaResult != null) {
+                        Navigator.push(context, FadeSlidePageRoute(page: CobrarComandaScreen(comanda: comandaResult)));
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('No hay historial en esta mesa'),

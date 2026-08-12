@@ -38,22 +38,29 @@ class _CobrarComandaScreenState extends State<CobrarComandaScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Desocupar Mesa'),
-        content: const Text('Esto cerrara la cuenta y marcara la mesa como libre.'),
+        title: const Text('Desocupar Mesa(s)'),
+        content: const Text('Esto cerrara la cuenta y marcara la mesa(s) como libre(s).'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              if (widget.comanda.idBackend != null) {
+              
+              final idsToPay = widget.comanda.idsBackendGrupo.isNotEmpty 
+                  ? widget.comanda.idsBackendGrupo 
+                  : (widget.comanda.idBackend != null ? [widget.comanda.idBackend!] : <String>[]);
+                  
+              if (idsToPay.isNotEmpty) {
                 showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
                 try {
-                  await _comandasRepository.pagarComanda(widget.comanda.idBackend!);
+                  for (var id in idsToPay) {
+                    await _comandasRepository.pagarComanda(id);
+                  }
                   if (mounted) {
                     Navigator.pop(context);
                     Navigator.popUntil(context, (route) => route.isFirst);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Mesa liberada exitosamente.'), backgroundColor: AppColors.success),
+                      const SnackBar(content: Text('Mesa(s) liberada(s) exitosamente.'), backgroundColor: AppColors.success),
                     );
                   }
                 } catch (e) {
@@ -180,41 +187,42 @@ class _CobrarComandaScreenState extends State<CobrarComandaScreen> {
                                 Text('\$${subtotalCuenta.toStringAsFixed(2)}', style: AppTextStyles.priceMedium),
                               ]),
                               const SizedBox(height: 12),
-                              ElevatedButton.icon(
-                                onPressed: isPagado ? null : () async {
-                                  if (widget.comanda.idBackend == null) {
-                                    setState(() => _cuentasPagadas[cuentaId] = true);
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cuenta $cuentaId pagada.'), backgroundColor: AppColors.success));
-                                    return;
-                                  }
-                                  showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
-                                  try {
-                                    final mesaDesocupada = await _comandasRepository.pagarCuentaComanda(widget.comanda.idBackend!, cuentaId);
-                                    if (mounted) {
-                                      Navigator.pop(context);
-                                      if (mesaDesocupada) {
-                                        Navigator.popUntil(context, (route) => route.isFirst);
-                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Todas las cuentas pagadas. Mesa liberada.'), backgroundColor: AppColors.success));
-                                      } else {
-                                        setState(() => _cuentasPagadas[cuentaId] = true);
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cuenta $cuentaId pagada.'), backgroundColor: AppColors.success));
+                              if (grupos.length > 1 || widget.comanda.idsBackendGrupo.length > 1)
+                                ElevatedButton.icon(
+                                  onPressed: isPagado ? null : () async {
+                                    if (widget.comanda.idBackend == null) {
+                                      setState(() => _cuentasPagadas[cuentaId] = true);
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cuenta $cuentaId pagada.'), backgroundColor: AppColors.success));
+                                      return;
+                                    }
+                                    showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
+                                    try {
+                                      final mesaDesocupada = await _comandasRepository.pagarCuentaComanda(widget.comanda.idBackend!, cuentaId);
+                                      if (mounted) {
+                                        Navigator.pop(context);
+                                        if (mesaDesocupada) {
+                                          Navigator.popUntil(context, (route) => route.isFirst);
+                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Todas las cuentas pagadas. Mesa liberada.'), backgroundColor: AppColors.success));
+                                        } else {
+                                          setState(() => _cuentasPagadas[cuentaId] = true);
+                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cuenta $cuentaId pagada.'), backgroundColor: AppColors.success));
+                                        }
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al pagar cuenta: $e'), backgroundColor: AppColors.error));
                                       }
                                     }
-                                  } catch (e) {
-                                    if (mounted) {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al pagar cuenta: $e'), backgroundColor: AppColors.error));
-                                    }
-                                  }
-                                },
-                                icon: Icon(isPagado ? Icons.check : Icons.credit_card),
-                                label: Text(isPagado ? 'Pagada' : 'Pagar \$${subtotalCuenta.toStringAsFixed(2)}'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: isPagado ? AppColors.border : AppColors.success,
-                                  foregroundColor: isPagado ? AppColors.textMuted : AppColors.textOnDark,
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  },
+                                  icon: Icon(isPagado ? Icons.check : Icons.credit_card),
+                                  label: Text(isPagado ? 'Pagada' : 'Pagar \$${subtotalCuenta.toStringAsFixed(2)}'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isPagado ? AppColors.border : AppColors.success,
+                                    foregroundColor: isPagado ? AppColors.textMuted : AppColors.textOnDark,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),

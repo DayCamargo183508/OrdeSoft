@@ -112,6 +112,7 @@ class ClienteSubCuenta {
 class ComandaMesa {
   final int mesaId;
   final String? idBackend;
+  final List<String> idsBackendGrupo;
   List<ClienteSubCuenta> clientes;
   int clienteActivoIndex;
   final String? nombreCliente;
@@ -122,6 +123,7 @@ class ComandaMesa {
   ComandaMesa({
     required this.mesaId,
     this.idBackend,
+    this.idsBackendGrupo = const [],
     List<ClienteSubCuenta>? clientes,
     this.clienteActivoIndex = 0,
     this.nombreCliente,
