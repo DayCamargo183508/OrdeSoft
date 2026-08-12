@@ -73,8 +73,7 @@ const obtenerComandaPorId = async (id) => {
     if (comandaResult.rows.length === 0)
         return null;
     const comanda = comandaResult.rows[0];
-    // Detalles
-    const detallesResult = await db_1.default.query("SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [id]);
+    const detallesResult = await db_1.default.query("SELECT d.id, d.comanda_id, d.producto_id, COALESCE(d.producto_nombre, 'Producto') AS producto_nombre, d.cantidad, d.precio_unitario, d.subtotal, d.notas, d.cuenta_id, d.cliente_nombre, d.estado_pago FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [id]);
     comanda.total = parseFloat(comanda.total);
     comanda.detalles = detallesResult.rows.map(d => ({
         ...d,
@@ -99,7 +98,7 @@ const obtenerComandasParaLlevar = async () => {
      WHERE c.tipo_orden = $1 AND c.estado NOT IN ($2, $3) 
      ORDER BY c.created_at DESC`, ['PARA_LLEVAR', 'pagado', 'cancelado']);
     const comandas = await Promise.all(result.rows.map(async (c) => {
-        const detallesResult = await db_1.default.query("SELECT d.* FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [c.id]);
+        const detallesResult = await db_1.default.query("SELECT d.id, d.comanda_id, d.producto_id, COALESCE(d.producto_nombre, 'Producto') AS producto_nombre, d.cantidad, d.precio_unitario, d.subtotal, d.notas, d.cuenta_id, d.cliente_nombre, d.estado_pago FROM comanda_detalles d WHERE d.comanda_id = $1 AND d.estado_pago = 'pendiente'", [c.id]);
         return {
             ...c,
             total: parseFloat(c.total),
@@ -142,7 +141,7 @@ const obtenerTicketCocina = async (comanda_id) => {
     if (cabeceraQuery.rows.length === 0)
         return null;
     const cabecera = cabeceraQuery.rows[0];
-    const detallesQuery = await db_1.default.query(`SELECT d.cantidad, d.producto_nombre as producto, d.notas 
+    const detallesQuery = await db_1.default.query(`SELECT d.cantidad, COALESCE(d.producto_nombre, 'Producto') as producto, d.notas 
      FROM comanda_detalles d 
      WHERE d.comanda_id = $1`, [comanda_id]);
     return { cabecera, detalles: detallesQuery.rows };

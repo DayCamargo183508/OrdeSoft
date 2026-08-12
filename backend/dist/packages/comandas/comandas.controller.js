@@ -162,7 +162,7 @@ const crearComanda = async (req, res) => {
         }
     }
     catch (error) {
-        console.error('Error creando comanda:', error);
+        console.error('[CREAR COMANDA ERROR]:', error);
         res.status(500).json({ message: error.message || 'Error interno al crear comanda.' });
     }
 };
