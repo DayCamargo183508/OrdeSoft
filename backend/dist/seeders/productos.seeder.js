@@ -38,6 +38,7 @@ const generarProductos = (cantidad) => {
         // 90% probabilidad de estar disponible
         const disponible = Math.random() > 0.1;
         productos.push({
+            _tempId: String(i), // ID temporal
             categoria_id: idCat,
             categoria: catRandom.nombre, // String para facilidad del Frontend
             nombre: nombreFinal,
@@ -50,24 +51,47 @@ const generarProductos = (cantidad) => {
     }
     return productos;
 };
+async function borrarColeccion(coleccionRef, batchSize = 100) {
+    const query = coleccionRef.limit(batchSize);
+    return new Promise((resolve, reject) => {
+        deleteQueryBatch(query, resolve).catch(reject);
+    });
+}
+async function deleteQueryBatch(query, resolve) {
+    const snapshot = await query.get();
+    if (snapshot.size === 0) {
+        resolve();
+        return;
+    }
+    const batch = firebase_1.firestore.batch();
+    snapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+    await batch.commit();
+    process.nextTick(() => {
+        deleteQueryBatch(query, resolve);
+    });
+}
 const runSeeder = async () => {
     console.log('🚀 Iniciando Seeder de Productos en Firestore...');
     if (!firebase_1.firestore) {
         console.error('❌ La instancia de Firestore no está inicializada. Revisa src/config/firebase.ts');
         process.exit(1);
     }
-    const productosNuevos = generarProductos(200);
     const coleccionRef = firebase_1.firestore.collection('productos');
+    console.log('🧹 Borrando productos existentes...');
+    await borrarColeccion(coleccionRef);
+    const productosNuevos = generarProductos(200);
     // Firestore permite hasta 500 operaciones por batch.
-    // Como son 200 productos, 1 batch es suficiente, pero lo haremos con lógica de lotes.
     const tamañoLote = 100;
     let batch = firebase_1.firestore.batch();
     let contadorLote = 0;
     let lotesEnviados = 0;
     try {
         for (const prod of productosNuevos) {
-            const docRef = coleccionRef.doc();
-            batch.set(docRef, prod);
+            const docRef = coleccionRef.doc(prod._tempId);
+            const { _tempId, ...restoProducto } = prod; // Eliminamos la llave temporal
+            batch.set(docRef, restoProducto);
             contadorLote++;
             if (contadorLote === tamañoLote) {
                 console.log(`[SEEDER] Insertando lote ${lotesEnviados + 1} (${tamañoLote} productos)...`);
