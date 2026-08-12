@@ -25,7 +25,7 @@ class KitchenTicketService {
         final productoCat = catalogoProductos.firstWhere(
           (p) => p.id.toString() == item.productoId,
           orElse: () => ProductoAdmin(
-            id: 0,
+            id: '0',
             nombre: 'Desconocido',
             precio: 0,
             categoriaId: 0,
