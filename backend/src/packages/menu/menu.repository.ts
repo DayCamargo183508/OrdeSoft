@@ -58,8 +58,8 @@ export const getProductos = async (incluirInactivos: boolean = false) => {
   const productos = snapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
-      id: doc.id,
       ...data,
+      id: doc.id.trim(),
       categoria_nombre: categoriasMap.get(String(data.categoria_id)) || data.categoria || 'Sin categoría'
     };
   });
@@ -102,7 +102,7 @@ export const createProducto = async (categoria_id: number, nombre: string, descr
 
 export const updateProducto = async (id: string, data: any) => {
   if (!firestore) throw new Error('Firestore no está inicializado.');
-  const docRef = firestore.collection('productos').doc(id);
+  const docRef = firestore.collection('productos').doc(id.trim());
   const doc = await docRef.get();
   if (!doc.exists) return null;
 
@@ -113,7 +113,7 @@ export const updateProducto = async (id: string, data: any) => {
 
 export const deleteProducto = async (id: string) => {
   if (!firestore) throw new Error('Firestore no está inicializado.');
-  const docRef = firestore.collection('productos').doc(id);
+  const docRef = firestore.collection('productos').doc(id.trim());
   const doc = await docRef.get();
   if (!doc.exists) return null;
   
