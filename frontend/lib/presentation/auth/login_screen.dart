@@ -53,7 +53,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         if (_pin.length == 4 && !_isLoading) _login();
       } else {
         String? digit;
-        if (event.logicalKey == LogicalKeyboardKey.numpad0 || event.logicalKey == LogicalKeyboardKey.digit0) digit = '0';
+        if (event.character != null && RegExp(r'^[0-9]$').hasMatch(event.character!)) {
+          digit = event.character;
+        } else if (event.logicalKey == LogicalKeyboardKey.numpad0 || event.logicalKey == LogicalKeyboardKey.digit0) digit = '0';
         else if (event.logicalKey == LogicalKeyboardKey.numpad1 || event.logicalKey == LogicalKeyboardKey.digit1) digit = '1';
         else if (event.logicalKey == LogicalKeyboardKey.numpad2 || event.logicalKey == LogicalKeyboardKey.digit2) digit = '2';
         else if (event.logicalKey == LogicalKeyboardKey.numpad3 || event.logicalKey == LogicalKeyboardKey.digit3) digit = '3';
@@ -160,12 +162,15 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      body: RawKeyboardListener(
-        focusNode: _focusNode,
-        onKey: _onKeyEvent,
-        autofocus: true,
-        child: Stack(
-          children: [
+      body: GestureDetector(
+        onTap: () => _focusNode.requestFocus(),
+        behavior: HitTestBehavior.translucent,
+        child: RawKeyboardListener(
+          focusNode: _focusNode,
+          onKey: _onKeyEvent,
+          autofocus: true,
+          child: Stack(
+            children: [
           Container(
             width: size.width, height: size.height,
             decoration: const BoxDecoration(
@@ -245,6 +250,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         ],
       ),
     ),
+  ),
   );
 }
 }

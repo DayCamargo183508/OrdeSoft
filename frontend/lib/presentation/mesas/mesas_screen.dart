@@ -408,9 +408,11 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
       final int grupoId = mesa.mesaPadreId ?? mesa.id;
       final double totalGrupo = _mesas.where((m) => m.id == grupoId || m.mesaPadreId == grupoId).fold(0.0, (sum, m) => sum + (_totalesMesasOcupadas[m.id] ?? 0.0));
       
-      textoEstado = 'G-M${mesa.numeroPadre ?? mesa.numero}';
-      if (totalIndiv > 0) textoEstado += '\n\$${totalIndiv.toStringAsFixed(2)}';
-      if (totalGrupo > totalIndiv) textoEstado += '\n(Tot: \$${totalGrupo.toStringAsFixed(2)})';
+      textoEstado = 'Grupo M${mesa.numeroPadre ?? mesa.numero}';
+      textoEstado += '\n\$${totalIndiv.toStringAsFixed(2)}';
+      if (totalGrupo != totalIndiv) {
+        textoEstado += '\n(Tot: \$${totalGrupo.toStringAsFixed(2)})';
+      }
       
       iconoEstado = Icons.link;
     } else if (estaLibre) {
