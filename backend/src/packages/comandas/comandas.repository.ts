@@ -224,6 +224,18 @@ export const pagarCuenta = async (comanda_id: number, cuenta_id: number) => {
       [comanda_id, cuenta_id]
     );
 
+    // Recalcular y actualizar el total de la comanda basado en lo que queda pendiente
+    const totalRes = await client.query(
+      "SELECT SUM(subtotal) as nuevo_total FROM comanda_detalles WHERE comanda_id = $1 AND estado_pago = 'pendiente'",
+      [comanda_id]
+    );
+    const nuevoTotal = parseFloat(totalRes.rows[0].nuevo_total || '0');
+    
+    await client.query(
+      "UPDATE comandas SET total = $1 WHERE id = $2",
+      [nuevoTotal, comanda_id]
+    );
+
     // Verificar si quedan pendientes
     const pendientesRes = await client.query(
       "SELECT COUNT(*) FROM comanda_detalles WHERE comanda_id = $1 AND estado_pago = 'pendiente'",
