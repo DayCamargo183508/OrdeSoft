@@ -63,29 +63,33 @@ app.use((err: any, req: Request, res: Response, next: express.NextFunction) => {
   });
 });
 
-// Listener del servidor
-const server = app.listen(PORT, HOST, () => {
-  const networkInterfaces = os.networkInterfaces();
-  let localIp = '127.0.0.1';
+// Listener del servidor (Solo para desarrollo local)
+if (process.env.NODE_ENV !== 'production') {
+  const server = app.listen(PORT, HOST, () => {
+    const networkInterfaces = os.networkInterfaces();
+    let localIp = '127.0.0.1';
 
-  for (const name in networkInterfaces) {
-    for (const net of networkInterfaces[name] || []) {
-      if (net.family === 'IPv4' && !net.internal) {
-        localIp = net.address;
-        break;
+    for (const name in networkInterfaces) {
+      for (const net of networkInterfaces[name] || []) {
+        if (net.family === 'IPv4' && !net.internal) {
+          localIp = net.address;
+          break;
+        }
       }
     }
-  }
 
-  console.log(`\n[SERVER] Servidor en linea:`);
-  console.log(`  > Localhost:  http://127.0.0.1:${PORT}`);
-  console.log(`  > Red local:  http://${localIp}:${PORT}/api\n`);
-});
+    console.log(`\n[SERVER] Servidor en linea:`);
+    console.log(`  > Localhost:  http://127.0.0.1:${PORT}`);
+    console.log(`  > Red local:  http://${localIp}:${PORT}/api\n`);
+  });
 
-server.on('error', (err: any) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`[ERROR] Puerto ${PORT} ya esta en uso por otro proceso.`);
-  } else {
-    console.error(`[ERROR] Fallo al iniciar el servidor:`, err);
-  }
-});
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`[ERROR] Puerto ${PORT} ya esta en uso por otro proceso.`);
+    } else {
+      console.error(`[ERROR] Fallo al iniciar el servidor:`, err);
+    }
+  });
+}
+
+export default app;
