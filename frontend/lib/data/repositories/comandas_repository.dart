@@ -64,55 +64,61 @@ class ComandasRepository {
       final response = await _apiClient.dio.get('/comandas');
       final List<dynamic> comandasActivas = response.data;
       
-      // Encontrar la comanda de la mesa actual
-      final comandaMap = comandasActivas.firstWhere(
-        (c) => c['mesa_id'] == mesaId,
-        orElse: () => null,
-      );
+      // Encontrar TODAS las comandas de la mesa actual
+      final comandasDeMesa = comandasActivas.where((c) => c['mesa_id'] == mesaId).toList();
 
-      if (comandaMap == null) return null;
+      if (comandasDeMesa.isEmpty) return null;
 
-      final comandaId = comandaMap['id'];
-      
-      // Obtener detalle de esa comanda específica
-      final detalleResponse = await _apiClient.dio.get('/comandas/$comandaId');
-      final detalleData = detalleResponse.data;
-      
-      // Agrupar por cuenta_id y cliente_nombre devueltos
+      List<String> idsBackendGrupo = [];
       Map<String, ClienteSubCuenta> clientesMap = {};
       int itemsTotales = 0;
+      double totalApiTotal = 0.0;
+      String? mesaNumeroStr;
 
-      for (var d in (detalleData['detalles'] as List<dynamic>)) {
-        final notasStr = d['notas']?.toString() ?? '';
-        final listNotas = notasStr.isEmpty 
-            ? <NotaAplicada>[] 
-            : notasStr.split(',').map((e) => NotaAplicada(e.trim(), 0.0)).toList();
-
-        final item = ItemComanda(
-          id: d['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
-          productoId: d['producto_id'].toString(),
-          producto: d['producto_nombre'] ?? 'Producto',
-          cantidad: d['cantidad'],
-          precioUnitario: double.tryParse(d['precio_unitario']?.toString() ?? '0') ?? 0.0,
-          notas: listNotas,
-          isNew: false,
-        );
-
-        itemsTotales += item.cantidad;
-        
-        final cuentaId = d['cuenta_id'] as int? ?? 1;
-        final clienteNombre = d['cliente_nombre']?.toString() ?? 'Cliente 1';
-        final key = '${cuentaId}_$clienteNombre';
-
-        if (!clientesMap.containsKey(key)) {
-          clientesMap[key] = ClienteSubCuenta(
-            id: key,
-            nombre: clienteNombre,
-            cuentaId: cuentaId,
-            items: [],
-          );
+      for (var comandaMap in comandasDeMesa) {
+        final comandaId = comandaMap['id'];
+        idsBackendGrupo.add(comandaId.toString());
+        totalApiTotal += double.tryParse(comandaMap['total']?.toString() ?? '0') ?? 0.0;
+        if (comandaMap['mesa_numero'] != null) {
+          mesaNumeroStr = comandaMap['mesa_numero'].toString();
         }
-        clientesMap[key]!.items.add(item);
+
+        final detalleResponse = await _apiClient.dio.get('/comandas/$comandaId');
+        final detalleData = detalleResponse.data;
+
+        for (var d in (detalleData['detalles'] as List<dynamic>)) {
+          final notasStr = d['notas']?.toString() ?? '';
+          final listNotas = notasStr.isEmpty 
+              ? <NotaAplicada>[] 
+              : notasStr.split(',').map((e) => NotaAplicada(e.trim(), 0.0)).toList();
+
+          final item = ItemComanda(
+            id: d['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+            productoId: d['producto_id'].toString(),
+            producto: d['producto_nombre'] ?? 'Producto',
+            cantidad: d['cantidad'],
+            precioUnitario: double.tryParse(d['precio_unitario']?.toString() ?? '0') ?? 0.0,
+            notas: listNotas,
+            isNew: false,
+          );
+
+          itemsTotales += item.cantidad;
+          
+          final cuentaId = d['cuenta_id'] as int? ?? 1;
+          final clienteNombre = d['cliente_nombre']?.toString() ?? 'Cliente 1';
+          // Se incluye el comandaId en la key para evitar colisiones accidentales de cuentas con el mismo nombre entre distintas comandas fantasma
+          final key = '${comandaId}_${cuentaId}_$clienteNombre';
+
+          if (!clientesMap.containsKey(key)) {
+            clientesMap[key] = ClienteSubCuenta(
+              id: key,
+              nombre: clienteNombre,
+              cuentaId: cuentaId,
+              items: [],
+            );
+          }
+          clientesMap[key]!.items.add(item);
+        }
       }
 
       final clientesFinales = clientesMap.values.toList();
@@ -120,10 +126,12 @@ class ComandasRepository {
 
       return ComandaMesa(
         mesaId: mesaId,
-        idBackend: comandaId.toString(),
+        idBackend: comandasDeMesa.first['id'].toString(), // Tomamos la mas reciente como principal
+        idsBackendGrupo: idsBackendGrupo,
         clientes: clientesFinales,
-        totalApi: double.tryParse(comandaMap['total']?.toString() ?? '0') ?? 0.0,
+        totalApi: totalApiTotal,
         itemsApiCount: itemsTotales,
+        mesaNumero: mesaNumeroStr,
       );
     } catch (e) {
       print('❌ Error al obtener comanda activa: $e');
@@ -240,7 +248,8 @@ class ComandasRepository {
       Map<int, double> totales = {};
       for (var c in comandasActivas) {
         if (c['mesa_id'] != null) {
-           totales[c['mesa_id'] as int] = double.tryParse(c['total']?.toString() ?? '0') ?? 0.0;
+           final double total = double.tryParse(c['total']?.toString() ?? '0') ?? 0.0;
+           totales[c['mesa_id'] as int] = (totales[c['mesa_id'] as int] ?? 0.0) + total;
         }
       }
       return totales;

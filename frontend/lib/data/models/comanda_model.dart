@@ -119,6 +119,7 @@ class ComandaMesa {
   final String tipoOrden;
   final double totalApi;
   final int itemsApiCount;
+  final String? mesaNumero;
 
   ComandaMesa({
     required this.mesaId,
@@ -130,6 +131,7 @@ class ComandaMesa {
     this.tipoOrden = 'MESA',
     this.totalApi = 0.0,
     this.itemsApiCount = 0,
+    this.mesaNumero,
   }) : clientes = clientes ?? [ClienteSubCuenta(id: 'c1', nombre: (nombreCliente != null && nombreCliente.isNotEmpty) ? nombreCliente : 'Cliente 1')];
 
   double get totalGeneral => clientes.fold(0, (sum, cliente) => sum + cliente.subtotal);
@@ -155,5 +157,6 @@ class ComandaMesa {
         clientes: (json['clientes'] as List<dynamic>?)
             ?.map((c) => ClienteSubCuenta.fromJson(c as Map<String, dynamic>))
             .toList(),
+        mesaNumero: json['mesaNumero']?.toString() ?? json['mesa_numero']?.toString(),
       );
 }

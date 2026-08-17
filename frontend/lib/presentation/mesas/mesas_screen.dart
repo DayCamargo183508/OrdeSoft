@@ -457,7 +457,7 @@ class _MesasScreenState extends State<MesasScreen> with SingleTickerProviderStat
                 children: [
                   Icon(iconoEstado, color: Colors.white.withOpacity(0.9), size: 26),
                   const SizedBox(height: 8),
-                  Text('Mesa ${index + 1}', style: AppTextStyles.mesaNumero),
+                  Text('Mesa ${mesa.numero}', style: AppTextStyles.mesaNumero),
                   const SizedBox(height: 4),
                   Text(
                     textoEstado,

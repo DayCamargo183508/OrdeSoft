@@ -97,7 +97,7 @@ class _CobrarComandaScreenState extends State<CobrarComandaScreen> {
     final grupos = _agruparPorCuenta();
     final titleText = widget.comanda.mesaId == 0
         ? 'Cobro — Para Llevar'
-        : 'Cobro — Mesa ${widget.comanda.mesaId}';
+        : 'Cobro — Mesa ${widget.comanda.mesaNumero ?? widget.comanda.mesaId}';
 
     return Scaffold(
       appBar: AppBar(title: Text(titleText)),
