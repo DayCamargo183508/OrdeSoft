@@ -61,28 +61,31 @@ app.use((err, req, res, next) => {
         ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
     });
 });
-// Listener del servidor
-const server = app.listen(PORT, HOST, () => {
-    const networkInterfaces = os_1.default.networkInterfaces();
-    let localIp = '127.0.0.1';
-    for (const name in networkInterfaces) {
-        for (const net of networkInterfaces[name] || []) {
-            if (net.family === 'IPv4' && !net.internal) {
-                localIp = net.address;
-                break;
+// Listener del servidor (Solo para desarrollo local)
+if (process.env.NODE_ENV !== 'production') {
+    const server = app.listen(PORT, HOST, () => {
+        const networkInterfaces = os_1.default.networkInterfaces();
+        let localIp = '127.0.0.1';
+        for (const name in networkInterfaces) {
+            for (const net of networkInterfaces[name] || []) {
+                if (net.family === 'IPv4' && !net.internal) {
+                    localIp = net.address;
+                    break;
+                }
             }
         }
-    }
-    console.log(`\n[SERVER] Servidor en linea:`);
-    console.log(`  > Localhost:  http://127.0.0.1:${PORT}`);
-    console.log(`  > Red local:  http://${localIp}:${PORT}/api\n`);
-});
-server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        console.error(`[ERROR] Puerto ${PORT} ya esta en uso por otro proceso.`);
-    }
-    else {
-        console.error(`[ERROR] Fallo al iniciar el servidor:`, err);
-    }
-});
+        console.log(`\n[SERVER] Servidor en linea:`);
+        console.log(`  > Localhost:  http://127.0.0.1:${PORT}`);
+        console.log(`  > Red local:  http://${localIp}:${PORT}/api\n`);
+    });
+    server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.error(`[ERROR] Puerto ${PORT} ya esta en uso por otro proceso.`);
+        }
+        else {
+            console.error(`[ERROR] Fallo al iniciar el servidor:`, err);
+        }
+    });
+}
+exports.default = app;
 //# sourceMappingURL=app.js.map
