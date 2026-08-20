@@ -232,13 +232,18 @@ class _AdminScreenState extends State<AdminScreen> {
       return c.numeroMesa.toString().contains(query) || c.meseroNombre.toLowerCase().contains(query);
     }).toList();
 
+    final isDesktop = MediaQuery.of(context).size.width >= AppBreakpoints.mobile;
+
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 16,
+            runSpacing: 16,
             children: [
               Text('Resumen del Día', style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold)),
               ElevatedButton.icon(
@@ -250,8 +255,10 @@ class _AdminScreenState extends State<AdminScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 16,
+            runSpacing: 16,
             children: [
               _buildMetricCard('Total Efectivo', '\$${_reporte!.totalCobradoEfectivo.toStringAsFixed(2)}', Icons.attach_money, Colors.green),
               _buildMetricCard('Comandas', '${_reporte!.totalComandasCompletadas}', Icons.receipt_long, Colors.blue),
@@ -279,12 +286,15 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 16,
+            runSpacing: 16,
             children: [
               Text('Detalle de Comandas', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold)),
               SizedBox(
-                width: 300,
+                width: isDesktop ? 300 : MediaQuery.of(context).size.width - 48,
                 child: TextField(
                   controller: _buscarComandaCtrl,
                   decoration: const InputDecoration(
@@ -397,52 +407,73 @@ class _AdminScreenState extends State<AdminScreen> {
                 final m = _meseros[index];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: m.activo ? Colors.green.shade100 : Colors.red.shade100,
-                      child: Icon(Icons.person, color: m.activo ? Colors.green : Colors.red),
-                    ),
-                    title: Text(m.nombre, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Rol: ${m.rol.toUpperCase()}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (m.pin != null)
-                          IconButton(
-                            icon: Icon(_mostrarPin[m.id] == true ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                            tooltip: 'Mostrar PIN',
-                            onPressed: () => setState(() => _mostrarPin[m.id] = !(_mostrarPin[m.id] == true)),
-                          ),
-                        if (_mostrarPin[m.id] == true && m.pin != null)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(m.pin!, style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
-                          ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blueAccent),
-                          tooltip: 'Editar',
-                          onPressed: () => _mostrarDialogoEditarMesero(m),
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: m.activo ? Colors.green.shade100 : Colors.red.shade100,
+                              child: Icon(Icons.person, color: m.activo ? Colors.green : Colors.red),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(m.nombre, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  Text('Rol: ${m.rol.toUpperCase()}'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.redAccent),
-                          tooltip: 'Eliminar',
-                          onPressed: () => _mostrarDialogoEliminarMesero(m),
-                        ),
-                        Switch(
-                          value: m.activo,
-                          onChanged: m.rol == 'admin' ? null : (val) async {
-                            try {
-                              setState(() => m.activo = val);
-                              final exito = await _adminRepo.actualizarEstadoMesero(m.id, val);
-                              if (!exito) {
-                                setState(() => m.activo = !val);
-                                if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al actualizar estado')));
-                              }
-                            } catch (e) {
-                              setState(() => m.activo = !val);
-                              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                            }
-                          },
+                        const SizedBox(height: 12),
+                        Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 4,
+                          children: [
+                            if (m.pin != null)
+                              IconButton(
+                                icon: Icon(_mostrarPin[m.id] == true ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                                tooltip: 'Mostrar PIN',
+                                onPressed: () => setState(() => _mostrarPin[m.id] = !(_mostrarPin[m.id] == true)),
+                              ),
+                            if (_mostrarPin[m.id] == true && m.pin != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(m.pin!, style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+                              ),
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                              tooltip: 'Editar',
+                              onPressed: () => _mostrarDialogoEditarMesero(m),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              tooltip: 'Eliminar',
+                              onPressed: () => _mostrarDialogoEliminarMesero(m),
+                            ),
+                            Switch(
+                              value: m.activo,
+                              onChanged: m.rol == 'admin' ? null : (val) async {
+                                try {
+                                  setState(() => m.activo = val);
+                                  final exito = await _adminRepo.actualizarEstadoMesero(m.id, val);
+                                  if (!exito) {
+                                    setState(() => m.activo = !val);
+                                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al actualizar estado')));
+                                  }
+                                } catch (e) {
+                                  setState(() => m.activo = !val);
+                                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                                }
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -935,49 +966,67 @@ class _AdminScreenState extends State<AdminScreen> {
                       label: const Text('Nuevo Producto'),
                     ),
                   )
-                : GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, 
-                childAspectRatio: 3,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: prodsFiltrados.length,
-              itemBuilder: (ctx, index) {
-                final p = prodsFiltrados[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(p.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('\$${p.precio.toStringAsFixed(2)} - ${p.categoriaNombre ?? ""}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: p.disponible,
-                          onChanged: (val) async {
-                            try {
-                              setState(() => p.disponible = val);
-                              final exito = await _menuRepo.actualizarDisponibilidadProducto(p.id, val);
-                              if (!exito) {
-                                setState(() => p.disponible = !val);
-                                if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al actualizar disponibilidad')));
-                              }
-                            } catch (e) {
-                              setState(() => p.disponible = !val);
-                              if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                            }
-                          },
+                : (MediaQuery.of(context).size.width >= AppBreakpoints.mobile)
+                    ? GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3, 
+                          childAspectRatio: 3,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
                         ),
-                        IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _mostrarDialogoProducto(p)),
-                        IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _eliminarProducto(p.id)),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                        itemCount: prodsFiltrados.length,
+                        itemBuilder: (ctx, index) => _buildProductoCard(prodsFiltrados[index]),
+                      )
+                    : ListView.builder(
+                        itemCount: prodsFiltrados.length,
+                        itemBuilder: (ctx, index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: _buildProductoCard(prodsFiltrados[index]),
+                        ),
+                      ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget _buildProductoCard(ProductoAdmin p) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(p.nombre, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 4),
+            Text('\$${p.precio.toStringAsFixed(2)} - ${p.categoriaNombre ?? ""}'),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Switch(
+                  value: p.disponible,
+                  onChanged: (val) async {
+                    try {
+                      setState(() => p.disponible = val);
+                      final exito = await _menuRepo.actualizarDisponibilidadProducto(p.id, val);
+                      if (!exito) {
+                        setState(() => p.disponible = !val);
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al actualizar disponibilidad')));
+                      }
+                    } catch (e) {
+                      setState(() => p.disponible = !val);
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  },
+                ),
+                IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _mostrarDialogoProducto(p)),
+                IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _eliminarProducto(p.id)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
