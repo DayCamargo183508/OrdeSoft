@@ -45,7 +45,7 @@ class AuthRepository {
       }
       
       if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout || e.message?.contains('ECONNREFUSED') == true) {
-         throw Exception('No se pudo conectar con el servidor. Verifica que el Backend esté iniciado en el puerto 3500.');
+         throw Exception('No se pudo conectar con el servidor. Si el sistema estaba inactivo, puede tardar hasta 60 segundos en despertar. Por favor, intenta de nuevo.');
       }
       
       throw Exception('Error de conexión: ${e.message}');
