@@ -847,12 +847,18 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           const SizedBox(height: 24),
           Listener(
+            behavior: HitTestBehavior.opaque,
             onPointerSignal: (pointerSignal) {
               if (pointerSignal is PointerScrollEvent) {
-                final offset = _categoriasScrollController.offset + pointerSignal.scrollDelta.dy;
-                _categoriasScrollController.jumpTo(
-                  offset.clamp(0.0, _categoriasScrollController.position.maxScrollExtent),
-                );
+                if (_categoriasScrollController.hasClients) {
+                  final double delta = pointerSignal.scrollDelta.dy != 0 
+                      ? pointerSignal.scrollDelta.dy 
+                      : pointerSignal.scrollDelta.dx;
+                  final offset = _categoriasScrollController.offset + delta;
+                  _categoriasScrollController.jumpTo(
+                    offset.clamp(0.0, _categoriasScrollController.position.maxScrollExtent),
+                  );
+                }
               }
             },
             child: SingleChildScrollView(
