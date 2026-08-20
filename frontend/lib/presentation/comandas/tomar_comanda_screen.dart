@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:ui';
 import '../../data/models/comanda_model.dart';
 import '../../data/models/categoria_model.dart';
@@ -49,6 +50,7 @@ class _TomarComandaScreenState extends State<TomarComandaScreen> {
   double _totalAnterior = 0.0;
   final PageController _pageController = PageController();
   int _pageIndex = 0;
+  final ScrollController _categoriasScrollController = ScrollController();
 
   @override
   void initState() {
@@ -402,21 +404,32 @@ class _TomarComandaScreenState extends State<TomarComandaScreen> {
   Widget _buildCategorias() {
     return Container(
       height: 56, padding: const EdgeInsets.symmetric(horizontal: 8), color: AppColors.surfaceCard,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal, itemCount: _categorias.length,
-        itemBuilder: (context, index) {
-          final cat = _categorias[index];
-          final isSelected = cat.id == _categoriaSeleccionada;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: ChoiceChip(
-              label: Text(cat.nombre, style: AppTextStyles.labelMedium.copyWith(
-                  color: isSelected ? AppColors.textOnDark : AppColors.textPrimary, fontWeight: FontWeight.w600)),
-              selected: isSelected, selectedColor: AppColors.primary,
-              onSelected: (_) => setState(() => _categoriaSeleccionada = cat.id),
-            ),
-          );
+      child: Listener(
+        onPointerSignal: (pointerSignal) {
+          if (pointerSignal is PointerScrollEvent) {
+            final offset = _categoriasScrollController.offset + pointerSignal.scrollDelta.dy;
+            _categoriasScrollController.jumpTo(
+              offset.clamp(0.0, _categoriasScrollController.position.maxScrollExtent),
+            );
+          }
         },
+        child: ListView.builder(
+          controller: _categoriasScrollController,
+          scrollDirection: Axis.horizontal, itemCount: _categorias.length,
+          itemBuilder: (context, index) {
+            final cat = _categorias[index];
+            final isSelected = cat.id == _categoriaSeleccionada;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: ChoiceChip(
+                label: Text(cat.nombre, style: AppTextStyles.labelMedium.copyWith(
+                    color: isSelected ? AppColors.textOnDark : AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                selected: isSelected, selectedColor: AppColors.primary,
+                onSelected: (_) => setState(() => _categoriaSeleccionada = cat.id),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

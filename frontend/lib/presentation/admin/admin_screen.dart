@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,6 +45,7 @@ class _AdminScreenState extends State<AdminScreen> {
   String _filtroMenu = '';
   Map<int, bool> _mostrarPin = {};
   int? _categoriaSeleccionadaId;
+  final ScrollController _categoriasScrollController = ScrollController();
 
   @override
   void initState() {
@@ -844,10 +846,20 @@ class _AdminScreenState extends State<AdminScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
+          Listener(
+            onPointerSignal: (pointerSignal) {
+              if (pointerSignal is PointerScrollEvent) {
+                final offset = _categoriasScrollController.offset + pointerSignal.scrollDelta.dy;
+                _categoriasScrollController.jumpTo(
+                  offset.clamp(0.0, _categoriasScrollController.position.maxScrollExtent),
+                );
+              }
+            },
+            child: SingleChildScrollView(
+              controller: _categoriasScrollController,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
                 ChoiceChip(
                   label: const Text('Todas'),
                   selected: _categoriaSeleccionadaId == null,
@@ -902,6 +914,7 @@ class _AdminScreenState extends State<AdminScreen> {
                 ))
               ],
             ),
+          ),
           ),
           const SizedBox(height: 24),
           Expanded(
