@@ -1126,7 +1126,7 @@ class _AdminScreenState extends State<AdminScreen> {
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
+          builder: (modalCtx, setModalState) {
             return AlertDialog(
               title: Text(p == null ? 'Nuevo Producto' : 'Editar Producto'),
               content: Column(
